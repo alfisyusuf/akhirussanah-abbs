@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Petugas - Akhirussanah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md w-96">
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-red-800">SMA ABBS</h2>
+            <p class="text-sm text-gray-500">Portal Petugas Akhirussanah</p>
+        </div>
+        
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Email Akses</label>
+                <input type="email" id="email" required class="mt-1 w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-red-800 outline-none" placeholder="Cth: guru@akhiru.id">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="password" required class="mt-1 w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-red-800 outline-none">
+            </div>
+            <button type="submit" id="btnSubmit" class="w-full bg-red-800 text-white font-bold py-2 rounded hover:bg-red-900 transition">
+                Masuk
+            </button>
+        </form>
+        <p id="errorMsg" class="text-red-500 text-sm mt-3 text-center hidden"></p>
+    </div>
+
+<script>
+    const supabase = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) window.location.replace('admin.html');
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmit');
+        const err = document.getElementById('errorMsg');
+        
+        btn.innerText = "Memeriksa..."; btn.disabled = true; err.classList.add('hidden');
+
+        const { error } = await supabase.auth.signInWithPassword({
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+        });
+
+        if (error) {
+            err.innerText = "Email atau password salah!";
+            err.classList.remove('hidden');
+            btn.innerText = "Masuk"; btn.disabled = false;
+        } else {
+            window.location.replace('admin.html'); 
+        }
+    });
+</script>
+</body>
+</html>
