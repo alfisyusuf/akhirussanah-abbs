@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner - Akhirussanah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-4">
+    <div class="w-full max-w-md flex justify-between items-center mb-6 mt-4 border-b border-gray-700 pb-4">
+        <a href="admin.html" class="text-gray-400 text-sm hover:text-white transition">← Dasbor</a>
+        <h1 class="font-bold text-lg text-red-400">Pintu Masuk Utama</h1>
+        <button onclick="logout()" class="text-gray-400 text-sm hover:text-white transition">Keluar</button>
+    </div>
+
+    <div id="reader" class="w-full max-w-md bg-white rounded-lg overflow-hidden shadow-2xl border-4 border-gray-800"></div>
+    
+    <div id="resultCard" class="hidden mt-6 bg-green-600 w-full max-w-md p-6 rounded-lg text-center shadow-lg transition-all border-2 border-green-400">
+        <div class="text-5xl mb-3">✅</div>
+        <h2 class="text-2xl font-bold">Check-in Berhasil</h2>
+        <p id="scannedName" class="text-xl mt-2 font-medium"></p>
+        <p id="scannedClass" class="text-md text-green-200 mt-1"></p>
+    </div>
+
+<script>
+    const supabase = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
+
+    async function checkAuth() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) window.location.replace('login.html');
+    }
+    checkAuth();
+
+    async function logout() {
+        await supabase.auth.signOut();
+        window.location.replace('login.html');
+    }
+
+    let isScanning = false;
+
+    async function onScanSuccess(decodedText) {
+        if(isScanning) return; 
+        isScanning = true;
+
+        const { data, error } = await supabase.from('undangan').select('id, nama, kelas').eq('qr_token', decodedText).single();
+        
+        if(data) {
+            await supabase.from('undangan').update({ hadir_hari_h: true }).eq('id', data.id);
+            
+            document.getElementById('resultCard').classList.remove('hidden');
+            document.getElementById('scannedName').innerText = data.nama;
+            document.getElementById('scannedClass').innerText = "Kelas " + data.kelas;
+            
+            // Notifikasi hilang otomatis setelah 3,5 detik
+            setTimeout(() => {
+                document.getElementById('resultCard').classList.add('hidden');
+                isScanning = false;
+            }, 3500);
+        } else {
+            alert("❌ QR Code tidak terdaftar di sistem!");
+            isScanning = false;
+        }
+    }
+
+    const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+    html5QrcodeScanner.render(onScanSuccess, () => {});
+</script>
+</body>
+</html>
