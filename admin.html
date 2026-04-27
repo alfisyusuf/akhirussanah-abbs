@@ -62,7 +62,18 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
 
     async function checkAuth() {
         const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) window.location.replace('login.html');
+        
+        // 1. Jika belum login sama sekali, tendang ke login
+        if (!session) {
+            window.location.replace('login.html');
+            return;
+        }
+
+        // 2. PROTEKSI EKSTRA: Jika yang mencoba masuk adalah akun panitia, larang akses!
+        if (session.user.email.includes('panitia')) {
+            alert("Akses Ditolak! Halaman Dasbor ini khusus untuk Guru/Admin.");
+            window.location.replace('scan.html');
+        }
     }
     checkAuth();
 
@@ -72,14 +83,35 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
     }
 
     const txtMessage = document.getElementById('waMessage');
-    if(localStorage.getItem('waTemplateAkhirussanah')) {
-        txtMessage.value = localStorage.getItem('waTemplateAkhirussanah');
+
+    // 1. Ambil template dari Supabase secara otomatis saat web dibuka
+    async function muatTemplate() {
+        const { data, error } = await supabaseClient.from('pengaturan').select('nilai').eq('kunci', 'template_wa').single();
+        if (data) {
+            txtMessage.value = data.nilai;
+        }
     }
+    muatTemplate();
 
     function insertVar(val) { txtMessage.value += val; }
-    function simpanPesan() {
-        localStorage.setItem('waTemplateAkhirussanah', txtMessage.value);
-        alert('Template WA berhasil disimpan di peramban Anda.');
+
+    // 2. Simpan template langsung ke Supabase saat tombol ditekan
+    async function simpanPesan() {
+        const btn = event.target;
+        const teksAsli = btn.innerText;
+        btn.innerText = "Menyimpan ke server..."; 
+        btn.disabled = true;
+
+        const { error } = await supabaseClient.from('pengaturan').update({ nilai: txtMessage.value }).eq('kunci', 'template_wa');
+        
+        if (!error) {
+            alert('✅ Template WA berhasil disimpan secara global di database!');
+        } else {
+            alert('⚠️ Gagal menyimpan template ke server.');
+        }
+        
+        btn.innerText = teksAsli;
+        btn.disabled = false;
     }
 
     async function loadData() {

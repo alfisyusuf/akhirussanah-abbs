@@ -33,23 +33,31 @@
 <script>
     const supabaseClient = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
 
+    // 1. Pengecekan saat halaman pertama kali dibuka
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
         if (session) {
-            window.location.replace('admin.html');
+            // Cek apakah email yang sedang login mengandung kata "panitia"
+            if (session.user.email.includes('panitia')) {
+                window.location.replace('scan.html');
+            } else {
+                window.location.replace('admin.html');
+            }
         }
     });
 
+    // 2. Proses saat tombol Masuk ditekan
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSubmit');
         const err = document.getElementById('errorMsg');
+        const inputEmail = document.getElementById('email').value;
         
         btn.innerText = "Memeriksa..."; 
         btn.disabled = true; 
         err.classList.add('hidden');
 
         const { error } = await supabaseClient.auth.signInWithPassword({
-            email: document.getElementById('email').value,
+            email: inputEmail,
             password: document.getElementById('password').value
         });
 
@@ -59,10 +67,15 @@
             btn.innerText = "Masuk"; 
             btn.disabled = false;
         } else {
-            alert("Berhasil masuk! Menyimpan sesi...");
+            alert("Berhasil masuk! Mengarahkan ke halaman...");
             setTimeout(() => {
-                window.location.replace('admin.html'); 
-            }, 1500);
+                // Arahkan ke halaman yang sesuai dengan akun
+                if (inputEmail.includes('panitia')) {
+                    window.location.replace('scan.html');
+                } else {
+                    window.location.replace('admin.html'); 
+                }
+            }, 1000);
         }
     });
 </script>
