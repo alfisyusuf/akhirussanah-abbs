@@ -3,29 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scanner - Akhirussanah</title>
+    <title>Scanner Panitia - Akhirussanah</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        #reader button { background-color: #800000; color: white; padding: 8px 16px; border-radius: 6px; font-size: 14px; margin: 4px; cursor: pointer; border: none; }
+        #reader button:hover { background-color: #5c0000; }
+        #reader select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 10px; }
+    </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-4">
-    <div class="w-full max-w-md flex justify-between items-center mb-6 mt-4 border-b border-gray-700 pb-4">
-        <a href="admin.html" class="text-gray-400 text-sm hover:text-white transition">← Dasbor</a>
-        <h1 class="font-bold text-lg text-red-400">Pintu Masuk Utama</h1>
-        <button onclick="logout()" class="text-gray-400 text-sm hover:text-white transition">Keluar</button>
+<body class="bg-gray-100 text-gray-800 min-h-screen font-sans relative">
+
+    <nav class="bg-red-800 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
+        <h1 class="font-bold text-lg">📷 Portal Panitia</h1>
+        <button onclick="logout()" class="text-red-200 text-sm hover:text-white transition font-semibold">Keluar</button>
+    </nav>
+
+    <div id="modalRiil" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm transition-all">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
+            <h3 class="text-xl font-bold mb-2 text-gray-800">Verifikasi Kehadiran</h3>
+            <p id="modalNama" class="text-xl text-red-800 font-bold mb-1"></p>
+            <p id="modalKelas" class="text-sm text-gray-500 mb-4"></p>
+
+            <div class="bg-blue-50 text-blue-800 p-3 rounded-lg mb-5 text-sm border border-blue-100">
+                Data Konfirmasi Web:<br>
+                <span id="modalKonf" class="font-bold text-base"></span>
+            </div>
+
+            <p class="mb-3 text-sm font-medium text-gray-600">Berapa jumlah riil yang masuk saat ini?</p>
+            <div class="grid grid-cols-3 gap-3 mb-5">
+                <button onclick="simpanRiil(1)" class="bg-green-50 hover:bg-green-100 border-2 border-green-500 text-green-800 py-4 rounded-xl font-bold text-2xl transition">1</button>
+                <button onclick="simpanRiil(2)" class="bg-green-50 hover:bg-green-100 border-2 border-green-500 text-green-800 py-4 rounded-xl font-bold text-2xl transition">2</button>
+                <button onclick="simpanRiil(3)" class="bg-green-50 hover:bg-green-100 border-2 border-green-500 text-green-800 py-4 rounded-xl font-bold text-2xl transition">3+</button>
+            </div>
+            <button onclick="batalScan()" class="text-gray-400 text-sm font-medium hover:text-gray-600 underline">Batal (Kembali Scan)</button>
+        </div>
     </div>
 
-    <div id="reader" class="w-full max-w-md bg-white rounded-lg overflow-hidden shadow-2xl border-4 border-gray-800"></div>
-    
-    <div id="resultCard" class="hidden mt-6 bg-green-600 w-full max-w-md p-6 rounded-lg text-center shadow-lg transition-all border-2 border-green-400">
-        <div class="text-5xl mb-3">✅</div>
-        <h2 class="text-2xl font-bold">Check-in Berhasil</h2>
-        <p id="scannedName" class="text-xl mt-2 font-medium"></p>
-        <p id="scannedClass" class="text-md text-green-200 mt-1"></p>
+    <div class="p-4 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="md:col-span-1 flex flex-col gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                <h2 class="font-bold text-gray-700 border-b pb-2 mb-4 text-center">Pintu Masuk Utama</h2>
+                
+                <div id="reader" class="w-full rounded-lg overflow-hidden border-2 border-gray-100"></div>
+                
+                <div id="resultCard" class="hidden mt-4 bg-green-100 border border-green-400 w-full p-4 rounded-lg text-center shadow-sm">
+                    <div class="text-4xl mb-1">✅</div>
+                    <h2 class="text-lg font-bold text-green-800">Berhasil Disimpan!</h2>
+                    <p id="scannedName" class="text-base mt-1 font-semibold text-gray-800"></p>
+                    <p id="scannedClass" class="text-sm font-bold text-green-700 mt-1"></p>
+                </div>
+                
+                <div id="errorCard" class="hidden mt-4 bg-red-100 border border-red-400 w-full p-4 rounded-lg text-center shadow-sm">
+                    <div class="text-4xl mb-1">❌</div>
+                    <h2 class="text-lg font-bold text-red-800">QR Tidak Valid!</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-2 flex flex-col gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex justify-between items-center">
+                <div>
+                    <p class="text-sm text-gray-500 font-medium">Total Kehadiran</p>
+                    <p id="totalHadir" class="mt-1">0 <span class="text-base font-normal text-gray-500">Keluarga</span></p>
+                </div>
+                <div class="text-right">
+                    <label class="block text-xs text-gray-500 mb-1">Filter Kelas</label>
+                    <select id="filterKelas" class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-red-800 bg-gray-50" onchange="renderTable()">
+                        <option value="ALL">Semua Kelas</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1">
+                <div class="p-3 bg-gray-50 border-b flex justify-between items-center">
+                    <h3 class="font-bold text-gray-700 text-sm">Riwayat Check-in</h3>
+                    <button onclick="loadHadirData()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1 rounded">🔄 Segarkan</button>
+                </div>
+                <div class="overflow-x-auto max-h-[500px]">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-white sticky top-0 shadow-sm">
+                            <tr class="text-gray-500 border-b">
+                                <th class="p-3 font-medium w-10 text-center">No</th>
+                                <th class="p-3 font-medium">Nama Siswa</th>
+                                <th class="p-3 font-medium text-center">Kelas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hadirTable">
+                            <tr><td colspan="3" class="p-4 text-center text-gray-400">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
 <script>
     const supabaseClient = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
+    let allHadirData = [];
+    let isScanning = false;
+    let idScanSaatIni = null; // Menyimpan ID siswa yang sedang di-scan
 
     async function checkAuth() {
         const { data: { session } } = await supabaseClient.auth.getSession();
@@ -38,34 +117,136 @@
         window.location.replace('login.html');
     }
 
-    let isScanning = false;
+    // Mengambil data untuk tabel riwayat (Menarik jumlah_hadir_riil)
+    async function loadHadirData() {
+        const { data, error } = await supabaseClient
+            .from('undangan')
+            .select('nama, kelas, konf_ortu, jumlah_hadir_riil')
+            .eq('hadir_hari_h', true)
+            .order('kelas').order('nama');
 
+        if (!error && data) {
+            allHadirData = data;
+            populateFilter(data);
+            renderTable();
+        }
+    }
+
+    function populateFilter(data) {
+        const filter = document.getElementById('filterKelas');
+        const currentVal = filter.value;
+        const kelasSet = [...new Set(data.map(i => i.kelas))].sort();
+        filter.innerHTML = `<option value="ALL">Semua Kelas</option>`;
+        kelasSet.forEach(k => filter.innerHTML += `<option value="${k}">${k}</option>`);
+        filter.value = currentVal; 
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('hadirTable');
+        const filterVal = document.getElementById('filterKelas').value;
+        tbody.innerHTML = '';
+
+        let filtered = allHadirData;
+        if (filterVal !== 'ALL') { filtered = allHadirData.filter(s => s.kelas === filterVal); }
+
+        let totalIndividu = 0;
+
+        if (filtered.length === 0) {
+            document.getElementById('totalHadir').innerHTML = `0 <span class="text-base font-normal text-gray-500">Keluarga</span>`;
+            tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-400">Belum ada data kehadiran.</td></tr>`;
+            return;
+        }
+
+        filtered.forEach((siswa, index) => {
+            let jmlRiil = siswa.jumlah_hadir_riil || 0;
+            totalIndividu += jmlRiil;
+
+            tbody.innerHTML += `
+                <tr class="border-b hover:bg-red-50 transition">
+                    <td class="p-3 text-center text-gray-500">${index + 1}</td>
+                    <td class="p-3 font-medium text-gray-800">
+                        ${siswa.nama} <br>
+                        <span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded border border-green-300">Masuk: ${jmlRiil} Orang</span>
+                    </td>
+                    <td class="p-3 text-center text-gray-600"><span class="bg-gray-100 px-2 py-1 rounded text-xs border">${siswa.kelas}</span></td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('totalHadir').innerHTML = `
+            <span class="text-2xl font-bold text-gray-800">${filtered.length}</span> <span class="text-sm font-normal text-gray-500">Keluarga</span> 
+            <span class="text-gray-300 mx-2">|</span> 
+            <span class="text-3xl font-bold text-blue-700">${totalIndividu}</span> <span class="text-sm font-normal text-blue-600">Orang (Riil)</span>
+        `;
+    }
+
+    // 1. TAHAP PERTAMA: Saat Kamera Berhasil Baca QR
     async function onScanSuccess(decodedText) {
         if(isScanning) return; 
         isScanning = true;
 
-        const { data, error } = await supabaseClient.from('undangan').select('id, nama, kelas').eq('qr_token', decodedText).single();
+        document.getElementById('resultCard').classList.add('hidden'); 
+        document.getElementById('errorCard').classList.add('hidden');
+
+        const { data, error } = await supabaseClient.from('undangan')
+            .select('id, nama, kelas, konf_ortu, hadir_hari_h').eq('qr_token', decodedText).single();
         
         if(data) {
-            await supabaseClient.from('undangan').update({ hadir_hari_h: true }).eq('id', data.id);
+            if (data.hadir_hari_h) {
+                alert("⚠️ PERHATIAN: Undangan atas nama " + data.nama + " SUDAH CHECK-IN sebelumnya! Jika ini rombongan susulan, Anda bisa mengubah angka riilnya.");
+            }
             
-            document.getElementById('resultCard').classList.remove('hidden');
-            document.getElementById('scannedName').innerText = data.nama;
-            document.getElementById('scannedClass').innerText = "Kelas " + data.kelas;
+            idScanSaatIni = data.id; // Simpan ID
+            document.getElementById('modalNama').innerText = data.nama;
+            document.getElementById('modalKelas').innerText = "Kelas " + data.kelas;
+            document.getElementById('modalKonf').innerText = data.konf_ortu || "Belum Mengisi Form Web";
             
-            // Notifikasi hilang otomatis setelah 3,5 detik
-            setTimeout(() => {
-                document.getElementById('resultCard').classList.add('hidden');
-                isScanning = false;
-            }, 3500);
+            // Tampilkan Modal
+            document.getElementById('modalRiil').classList.remove('hidden');
         } else {
-            alert("❌ QR Code tidak terdaftar di sistem!");
-            isScanning = false;
+            document.getElementById('errorCard').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('errorCard').classList.add('hidden'); isScanning = false; }, 3000);
         }
     }
 
-    const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-    html5QrcodeScanner.render(onScanSuccess, () => {});
+    // 2. TAHAP KEDUA: Saat Tombol Angka (1, 2, 3+) di Klik
+    async function simpanRiil(jumlah) {
+        document.getElementById('modalRiil').classList.add('hidden'); // Tutup modal
+
+        // Update database: Tandai hadir = true, dan simpan angka riilnya
+        await supabaseClient.from('undangan').update({ 
+            hadir_hari_h: true, 
+            jumlah_hadir_riil: jumlah 
+        }).eq('id', idScanSaatIni);
+        
+        // Tampilkan pesan sukses di bawah kamera
+        const resCard = document.getElementById('resultCard');
+        resCard.classList.remove('hidden');
+        document.getElementById('scannedName').innerText = document.getElementById('modalNama').innerText;
+        document.getElementById('scannedClass').innerText = "Tercatat Masuk: " + jumlah + " Orang";
+        
+        loadHadirData(); // Segarkan tabel dan jumlah total di layar
+
+        // Beri jeda 2 detik sebelum kamera bisa baca QR selanjutnya
+        setTimeout(() => { 
+            resCard.classList.add('hidden'); 
+            isScanning = false; 
+            idScanSaatIni = null;
+        }, 2000);
+    }
+
+    // Jika panitia batal scan
+    function batalScan() {
+        document.getElementById('modalRiil').classList.add('hidden');
+        isScanning = false;
+        idScanSaatIni = null;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadHadirData(); 
+        const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+        html5QrcodeScanner.render(onScanSuccess, () => {});
+    });
 </script>
 </body>
 </html>
