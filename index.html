@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undangan Akhirussanah – SMA ABBS Surakarta</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* === MASUKKAN SELURUH CSS (DARI <style> SAMPAI </style>) MILIK ANDA DI SINI === */
+        :root {
+            --maroon:      #800000;
+            --maroon-dark: #5c0000;
+            --blue-light:  #89CFF0;
+            --blue-pale:   #f0f7fb;
+            --cream:       #ffffff;
+            --ink:         #1c1c1c;
+            --muted:       #7a7a7a;
+            --border:      #eaeaea;
+            --green:       #2d6a4f;
+            --green-bg:    #e8f5ee;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { background: #f4f6f8; font-family: 'DM Sans', sans-serif; color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+        
+        #preloader { position: fixed; inset: 0; z-index: 100; background: var(--maroon); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; transition: opacity 0.8s ease, visibility 0.8s ease; }
+        #preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .loader-logo { width: 88px; height: 88px; border-radius: 50%; border: 2px solid rgba(137, 207, 240, 0.4); display: flex; align-items: center; justify-content: center; position: relative; animation: pulseRing 2s ease-in-out infinite; }
+        @keyframes pulseRing { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(137, 207, 240, 0.3); } 50% { transform: scale(1); box-shadow: 0 0 0 10px rgba(137, 207, 240, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(137, 207, 240, 0); } }
+        .loader-logo-img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--cream); }
+        .loader-text { text-align: center; }
+        .loader-text h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: #fff; letter-spacing: 1px; }
+        .loader-text p { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 6px; letter-spacing: 0.5px; animation: blink 1.6s ease-in-out infinite; }
+        @keyframes blink { 0%,100%{opacity:.5} 50%{opacity:1} }
+        
+        #errorScreen { position: fixed; inset: 0; z-index: 90; background: var(--cream); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 32px; text-align: center; }
+        #errorScreen .err-icon { font-size: 48px; }
+        #errorScreen h2 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--maroon); }
+        #errorScreen p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+        
+        #app { max-width: 430px; margin: 0 auto; min-height: 100vh; background: var(--cream); display: none; opacity: 0; transition: opacity 1s ease; box-shadow: 0 0 40px rgba(0,0,0,0.05); }
+        
+        .hero { background: linear-gradient(160deg, var(--maroon) 0%, var(--maroon-dark) 100%); padding: 40px 28px 52px; position: relative; overflow: hidden; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 100px; padding: 6px 14px; margin-bottom: 20px; }
+        .hero-badge span { font-size: 11px; color: #fff; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500; }
+        .hero-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+        .hero-logo { width: 52px; height: 52px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); overflow: hidden; flex-shrink: 0; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; }
+        .hero-logo img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-brand-text p:first-child { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; color: #fff; }
+        .hero-brand-text p:last-child { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+        .hero-divider { width: 40px; height: 1px; background: linear-gradient(to right, var(--blue-light), transparent); margin: 0 0 20px; }
+        .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 8px; }
+        .hero-sub { font-size: 13px; color: rgba(255,255,255,0.7); }
+        
+        .recipient-card { margin: -24px 20px 0; background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); border: 1px solid var(--border); text-align: center; position: relative; z-index: 10; }
+        .recipient-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 8px; }
+        .recipient-name { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; color: var(--maroon); line-height: 1.2; margin-bottom: 4px; }
+        .recipient-sub { font-size: 13px; color: var(--muted); }
+        .recipient-ornament { width: 48px; height: 2px; background: linear-gradient(to right, transparent, var(--blue-light), transparent); margin: 16px auto 0; border-radius: 2px; }
+        
+        .bismillah-banner { margin: 28px 24px; background: var(--blue-pale); border: 1px solid rgba(137, 207, 240, 0.3); border-radius: 16px; padding: 20px 24px; text-align: center; }
+        .bismillah-arabic { font-size: 24px; color: var(--maroon); margin-bottom: 8px; font-family: 'Cormorant Garamond', serif; font-weight: 600; letter-spacing: 2px; }
+        .bismillah-text { font-size: 12px; color: var(--muted); line-height: 1.6; font-style: italic; }
+        
+        .opening-text { margin: 0 24px 28px; font-size: 14px; color: #444; line-height: 1.8; text-align: center; }
+        
+        .section-heading { display: flex; align-items: center; gap: 12px; margin: 0 24px 16px; }
+        .section-heading h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; color: var(--maroon); white-space: nowrap; }
+        .section-heading-line { flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent); }
+        
+        .info-card { margin: 0 24px 28px; background: #fff; border-radius: 20px; border: 1px solid var(--border); overflow: hidden; }
+        .info-row { display: flex; align-items: flex-start; padding: 16px 20px; gap: 14px; border-bottom: 1px solid var(--border); }
+        .info-row:last-child { border-bottom: none; }
+        .info-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--blue-pale); border: 1px solid rgba(137, 207, 240, 0.3); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; color: var(--maroon); }
+        .info-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+        .info-value { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.4; }
+        
+        .qr-section { margin: 0 24px 28px; background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); border-radius: 20px; padding: 28px 24px; text-align: center; position: relative; overflow: hidden; }
+        .qr-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 6px; position: relative; z-index: 1; }
+        .qr-subtitle { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 24px; position: relative; z-index: 1; line-height: 1.6; }
+        .qr-frame { display: inline-block; background: #fff; padding: 12px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); position: relative; z-index: 1; }
+        #qrcode canvas, #qrcode img { border-radius: 6px; display: block; }
+        .qr-id { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 16px; letter-spacing: 1px; position: relative; z-index: 1; }
+        
+        #confirmedView { margin: 0 24px 28px; background: #fff; border-radius: 20px; border: 1px solid var(--border); overflow: hidden; display: none; }
+        .confirmed-header { background: var(--green-bg); padding: 24px; text-align: center; border-bottom: 1px solid rgba(45,106,79,0.1); }
+        .confirmed-icon { width: 56px; height: 56px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 4px 16px rgba(45,106,79,0.15); font-size: 24px; }
+        .confirmed-header h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+        .confirmed-header p { font-size: 13px; color: #5a8a70; }
+        .confirmed-body { padding: 20px 24px; }
+        .status-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #fafafa; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .status-label { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+        .status-value { font-size: 14px; font-weight: 600; color: var(--ink); }
+        .btn-edit { display: block; width: 100%; margin-top: 16px; padding: 14px; border-radius: 12px; border: 1.5px solid var(--border); background: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: var(--maroon); cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+        .btn-edit:hover { background: var(--blue-pale); border-color: var(--maroon); }
+        
+        #formSection { margin: 0 24px 40px; background: #fff; border-radius: 20px; border: 1px solid var(--border); overflow: hidden; display: none; }
+        .form-header { background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); padding: 24px; text-align: center; }
+        .form-header h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+        .form-header p { font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.6; }
+        .form-body { padding: 24px; }
+        .field-group { margin-bottom: 24px; }
+        .field-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px; display: block; }
+        .select-input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1.5px solid var(--border); background: #fafafa; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink); outline: none; transition: border-color 0.2s; }
+        .select-input:focus { border-color: var(--maroon); }
+        
+        .btn-submit { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; border: none; border-radius: 14px; cursor: pointer; letter-spacing: 0.3px; box-shadow: 0 6px 24px rgba(128,0,0,0.25); transition: opacity 0.2s, transform 0.15s; }
+        .btn-submit:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-cancel { display: block; width: 100%; padding: 12px; background: none; border: none; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); cursor: pointer; margin-top: 8px; text-decoration: underline; }
+        
+        .invite-footer { margin: 0 24px 40px; text-align: center; }
+        .footer-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; color: var(--maroon); margin-bottom: 4px; }
+        .footer-sub { font-size: 12px; color: var(--muted); }
+        
+        .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--green); color: #fff; padding: 14px 24px; border-radius: 100px; font-size: 13px; font-weight: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 999; white-space: nowrap; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .fade-up { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<div id="preloader">
+    <div class="loader-logo">
+        <img class="loader-logo-img" src="./logo_sma_abbs_surakarta.png" alt="Logo SMA ABBS" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="loader-logo-fallback" style="display:none">ABBS</div>
+    </div>
+    <div class="loader-text">
+        <h2>SMA ABBS Surakarta</h2>
+        <p>Memuat tiket masuk...</p>
+    </div>
+</div>
+
+<div id="errorScreen">
+    <div class="err-icon">🔍</div>
+    <h2>Undangan Tidak Ditemukan</h2>
+    <p id="errorText">Mohon pastikan tautan yang Anda buka sudah benar.</p>
+</div>
+
+<div id="app">
+    <div class="hero">
+        <div class="hero-brand">
+            <div class="hero-logo">
+                <img src="./logo_sma_abbs_surakarta.png" alt="Logo SMA ABBS" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\\'http://www.w3.org/2000/svg\\\'/%3E'">
+            </div>
+            <div class="hero-brand-text">
+                <p>SMA ABBS Surakarta</p>
+                <p>Angkatan 11</p>
+            </div>
+        </div>
+        <div class="hero-badge"><span>Undangan Resmi</span></div>
+        <div class="hero-divider"></div>
+        <h1>Akhirussanah<br><span style="font-size:22px;opacity:.8">—</span></h1>
+        <p class="hero-sub" style="margin-top:10px">Tasyakuran Pelepasan Siswa Kelas XII</p>
+    </div>
+
+    <div class="recipient-card fade-up">
+        <p class="recipient-label">Undangan ini disampaikan kepada</p>
+        <p class="recipient-name" id="namaSiswaDisplay">—</p>
+        <p class="recipient-sub" id="kelasDisplay">—</p>
+        <div class="recipient-ornament"></div>
+    </div>
+
+    <div class="bismillah-banner fade-up">
+        <div class="bismillah-arabic">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+        <p class="bismillah-text">Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang</p>
+    </div>
+
+    <p class="opening-text fade-up">
+        Assalamu'alaikum Warahmatullahi Wabarakatuh.<br><br>
+        Mengharap kehadiran Bapak/Ibu wali murid beserta putra-putri tercinta dalam acara <strong>Akhirussanah</strong> — sebagai wujud syukur atas selesainya masa studi di SMA ABBS Surakarta.
+    </p>
+
+    <div class="qr-section fade-up">
+        <h3 class="qr-title">Tiket Digital Anda</h3>
+        <p class="qr-subtitle">Tunjukkan layar ponsel dengan QR Code ini kepada panitia saat tiba di gerbang acara.</p>
+        <div class="qr-frame">
+            <div id="qrcode"></div>
+        </div>
+        <p class="qr-id" id="waDisplay">—</p>
+    </div>
+
+    <div id="confirmedView">
+        <div class="confirmed-header">
+            <div class="confirmed-icon">✅</div>
+            <h3>Konfirmasi Tersimpan</h3>
+            <p>Terima kasih atas respons Anda.</p>
+        </div>
+        <div class="confirmed-body">
+            <div class="status-row">
+                <div>
+                    <p class="status-label">Kehadiran Siswa</p>
+                    <p class="status-value" id="dispSiswa">—</p>
+                </div>
+            </div>
+            <div class="status-row">
+                <div>
+                    <p class="status-label">Kehadiran Wali (Maks 2)</p>
+                    <p class="status-value" id="dispOrtu">—</p>
+                </div>
+            </div>
+            <button class="btn-edit" id="btnEdit">✏️ Ubah Konfirmasi</button>
+        </div>
+    </div>
+
+    <div id="formSection">
+        <div class="form-header">
+            <h3>Konfirmasi Kehadiran</h3>
+            <p>Mohon isi formulir ini untuk menyiapkan akomodasi tempat duduk yang presisi.</p>
+        </div>
+        <div class="form-body">
+            <form id="konfirmasiForm">
+                <div class="field-group">
+                    <label class="field-label">Kehadiran Siswa</label>
+                    <select id="hadirSiswa" class="select-input" required>
+                        <option value="">-- Pilih Status --</option>
+                        <option value="Hadir">Siswa Hadir</option>
+                        <option value="Tidak Hadir">Siswa Berhalangan Hadir</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Kehadiran Bapak/Ibu Wali</label>
+                    <select id="hadirOrtu" class="select-input" required>
+                        <option value="">-- Pilih Status --</option>
+                        <option value="Hadir 1 Orang">Hadir 1 Orang</option>
+                        <option value="Hadir 2 Orang">Hadir 2 Orang</option>
+                        <option value="Tidak Hadir">Berhalangan Hadir</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="btnSubmit" class="btn-submit">Kirim Konfirmasi</button>
+                <button type="button" id="btnBatalEdit" class="btn-cancel hidden">Batal Ubah</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="invite-footer fade-up">
+        <p class="footer-name">SMA Al-Abidin Bilingual Boarding School</p>
+        <p class="footer-sub">Surakarta · Jawa Tengah</p>
+    </div>
+</div>
+
+<div class="toast" id="toast">✅ Disimpan!</div>
+
+<script>
+    // === MASUKKAN API KEY SUPABASE ANDA DI SINI ===
+    const supabase = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get('token'); 
+
+    /* ---- Helper Functions ---- */
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    function showError(message) {
+        document.getElementById('preloader').classList.add('hidden');
+        const es = document.getElementById('errorScreen');
+        es.style.display = 'flex';
+        document.getElementById('errorText').textContent = message;
+    }
+
+    /* ---- Animasi Scroll ---- */
+    const fadeEls = document.querySelectorAll('.fade-up');
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    fadeEls.forEach(el => io.observe(el));
+
+    /* ---- Alur Utama ---- */
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!urlToken) { showError("Tautan undangan tidak lengkap."); return; }
+
+        try {
+            // MENGAMBIL DATA MENGGUNAKAN JALUR KHUSUS RLS (RPC)
+            const { data, error } = await supabase.rpc('cek_undangan', { token_cari: urlToken });
+            
+            if (error || !data || data.length === 0) { 
+                showError("Mohon maaf, tiket undangan tidak valid atau tidak terdaftar."); 
+                return; 
+            }
+
+            const siswa = data[0]; 
+
+            // Mengisi Teks Undangan
+            document.getElementById('namaSiswaDisplay').textContent = siswa.nama;
+            document.getElementById('kelasDisplay').textContent = "Kelas " + siswa.kelas;
+            document.getElementById('waDisplay').textContent = "ID Registrasi: " + siswa.qr_token;
+            
+            // Membuat QR Code (Hanya berisi String Token agar discan panitia)
+            new QRCode(document.getElementById("qrcode"), {
+                text: siswa.qr_token, width: 160, height: 160,
+                colorDark: "#800000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Logika Tampilan Form vs Hasil Konfirmasi
+            if (siswa.konf_siswa !== 'Belum Konfirmasi' || siswa.konf_ortu !== 'Belum Konfirmasi') {
+                document.getElementById('dispSiswa').textContent = siswa.konf_siswa;
+                document.getElementById('dispOrtu').textContent = siswa.konf_ortu;
+                
+                document.getElementById('hadirSiswa').value = siswa.konf_siswa;
+                document.getElementById('hadirOrtu').value = siswa.konf_ortu;
+                
+                document.getElementById('confirmedView').style.display = 'block';
+                document.getElementById('btnSubmit').textContent = "Perbarui Konfirmasi";
+                document.getElementById('btnBatalEdit').classList.remove('hidden');
+            } else {
+                document.getElementById('formSection').style.display = 'block';
+            }
+
+            // Membuka Tirai (Menghilangkan Loading)
+            setTimeout(() => {
+                document.getElementById('preloader').classList.add('hidden');
+                const app = document.getElementById('app');
+                app.style.display = 'block';
+                app.style.opacity = '1';
+            }, 800);
+
+        } catch (err) {
+            showError("Terjadi kendala jaringan. Silakan muat ulang halaman ini.");
+        }
+    });
+
+    /* ---- Event Listener Tombol ---- */
+    document.getElementById('btnEdit').addEventListener('click', () => {
+        document.getElementById('confirmedView').style.display = 'none';
+        document.getElementById('formSection').style.display = 'block';
+        document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    document.getElementById('btnBatalEdit').addEventListener('click', () => {
+        document.getElementById('formSection').style.display = 'none';
+        document.getElementById('confirmedView').style.display = 'block';
+    });
+
+    document.getElementById('konfirmasiForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmit');
+        btn.disabled = true; btn.textContent = 'Menyimpan…';
+
+        const valSiswa = document.getElementById('hadirSiswa').value;
+        const valOrtu  = document.getElementById('hadirOrtu').value;
+
+        // MENYIMPAN DATA MENGGUNAKAN JALUR KHUSUS RLS (RPC)
+        const { error } = await supabase.rpc('submit_konfirmasi', {
+            token_cari: urlToken,
+            status_siswa: valSiswa,
+            status_ortu: valOrtu,
+            waktu: new Date().toLocaleString('id-ID')
+        });
+
+        if (!error) {
+            document.getElementById('dispSiswa').textContent = valSiswa;
+            document.getElementById('dispOrtu').textContent = valOrtu;
+            
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('confirmedView').style.display = 'block';
+            document.getElementById('confirmedView').scrollIntoView({ behavior: 'smooth' });
+            
+            btn.textContent = "Perbarui Konfirmasi";
+            document.getElementById('btnBatalEdit').classList.remove('hidden');
+            showToast('✅ Konfirmasi Anda berhasil disimpan!');
+        } else {
+            showToast('⚠️ Gagal terhubung ke server.');
+        }
+        btn.disabled = false;
+    });
+</script>
+</body>
+</html>
