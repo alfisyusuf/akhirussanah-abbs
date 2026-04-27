@@ -34,7 +34,9 @@
     const supabase = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) window.location.replace('admin.html');
+        if (session) {
+            window.location.replace('admin.html');
+        }
     });
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -42,7 +44,9 @@
         const btn = document.getElementById('btnSubmit');
         const err = document.getElementById('errorMsg');
         
-        btn.innerText = "Memeriksa..."; btn.disabled = true; err.classList.add('hidden');
+        btn.innerText = "Memeriksa..."; 
+        btn.disabled = true; 
+        err.classList.add('hidden');
 
         const { error } = await supabase.auth.signInWithPassword({
             email: document.getElementById('email').value,
@@ -52,9 +56,13 @@
         if (error) {
             err.innerText = "Email atau password salah!";
             err.classList.remove('hidden');
-            btn.innerText = "Masuk"; btn.disabled = false;
+            btn.innerText = "Masuk"; 
+            btn.disabled = false;
         } else {
-            window.location.replace('admin.html'); 
+            alert("Berhasil masuk! Menyimpan sesi...");
+            setTimeout(() => {
+                window.location.replace('admin.html'); 
+            }, 1500);
         }
     });
 </script>
