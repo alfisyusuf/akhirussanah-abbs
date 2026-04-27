@@ -58,16 +58,16 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
     </div>
 
 <script>
-    const supabase = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
+    const supabaseClient = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
 
     async function checkAuth() {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) window.location.replace('login.html');
     }
     checkAuth();
 
     async function logout() {
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         window.location.replace('login.html');
     }
 
@@ -83,7 +83,7 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
     }
 
     async function loadData() {
-        const { data, error } = await supabase.from('undangan').select('*').order('kelas').order('nama');
+        const { data, error } = await supabaseClient.from('undangan').select('*').order('kelas').order('nama');
         if(error) return alert("Gagal mengambil data dari Supabase.");
 
         const kelasSet = [...new Set(data.map(i => i.kelas))].sort();

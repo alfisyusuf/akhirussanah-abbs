@@ -252,7 +252,7 @@
 
 <script>
     // === MASUKKAN API KEY SUPABASE ANDA DI SINI ===
-    const supabase = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
+    const supabaseClient = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
 
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token'); 
@@ -284,7 +284,7 @@
 
         try {
             // MENGAMBIL DATA MENGGUNAKAN JALUR KHUSUS RLS (RPC)
-            const { data, error } = await supabase.rpc('cek_undangan', { token_cari: urlToken });
+            const { data, error } = await supabaseClient.rpc('cek_undangan', { token_cari: urlToken });
             
             if (error || !data || data.length === 0) { 
                 showError("Mohon maaf, tiket undangan tidak valid atau tidak terdaftar."); 
@@ -353,7 +353,7 @@
         const valOrtu  = document.getElementById('hadirOrtu').value;
 
         // MENYIMPAN DATA MENGGUNAKAN JALUR KHUSUS RLS (RPC)
-        const { error } = await supabase.rpc('submit_konfirmasi', {
+        const { error } = await supabaseClient.rpc('submit_konfirmasi', {
             token_cari: urlToken,
             status_siswa: valSiswa,
             status_ortu: valOrtu,

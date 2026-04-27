@@ -25,16 +25,16 @@
     </div>
 
 <script>
-    const supabase = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
+    const supabaseClient = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
 
     async function checkAuth() {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) window.location.replace('login.html');
     }
     checkAuth();
 
     async function logout() {
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         window.location.replace('login.html');
     }
 
@@ -44,10 +44,10 @@
         if(isScanning) return; 
         isScanning = true;
 
-        const { data, error } = await supabase.from('undangan').select('id, nama, kelas').eq('qr_token', decodedText).single();
+        const { data, error } = await supabaseClient.from('undangan').select('id, nama, kelas').eq('qr_token', decodedText).single();
         
         if(data) {
-            await supabase.from('undangan').update({ hadir_hari_h: true }).eq('id', data.id);
+            await supabaseClient.from('undangan').update({ hadir_hari_h: true }).eq('id', data.id);
             
             document.getElementById('resultCard').classList.remove('hidden');
             document.getElementById('scannedName').innerText = data.nama;

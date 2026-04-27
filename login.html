@@ -31,9 +31,9 @@
     </div>
 
 <script>
-    const supabase = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
+    const supabaseClient = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
         if (session) {
             window.location.replace('admin.html');
         }
@@ -48,7 +48,7 @@
         btn.disabled = true; 
         err.classList.add('hidden');
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabaseClient.auth.signInWithPassword({
             email: document.getElementById('email').value,
             password: document.getElementById('password').value
         });
