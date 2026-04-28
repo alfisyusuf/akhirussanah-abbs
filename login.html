@@ -3,40 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Petugas - Akhirussanah</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Login Petugas – Akhirussanah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a0000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ── Background decoration ── */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -120px; right: -120px;
+            width: 480px; height: 480px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(128,0,0,0.45) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -140px; left: -100px;
+            width: 400px; height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(100,0,0,0.3) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* ── Card ── */
+        .card {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 400px;
+            margin: 24px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 24px;
+            padding: 40px 36px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 32px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+            animation: fadeIn 0.6s ease forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Header ── */
+        .card-header { text-align: center; margin-bottom: 36px; }
+        .logo-ring {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(201,168,76,0.45);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px;
+            background: rgba(128,0,0,0.3);
+            box-shadow: 0 0 0 6px rgba(201,168,76,0.06);
+        }
+        .logo-ring img {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .logo-ring .logo-fallback {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.8);
+        }
+        .card-header h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.01em;
+            margin-bottom: 6px;
+        }
+        .card-header p {
+            font-size: 13px;
+            color: rgba(255,255,255,0.45);
+            letter-spacing: 0.3px;
+        }
+        .divider {
+            width: 36px; height: 1.5px;
+            background: linear-gradient(to right, transparent, rgba(201,168,76,0.6), transparent);
+            margin: 14px auto 0;
+        }
+
+        /* ── Form ── */
+        .field { margin-bottom: 18px; }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 8px;
+        }
+        .input-wrap { position: relative; }
+        .input-icon {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 13px 16px 13px 42px;
+            background: rgba(255,255,255,0.06);
+            border: 1.5px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+        input::placeholder { color: rgba(255,255,255,0.25); }
+        input:focus {
+            border-color: rgba(201,168,76,0.55);
+            background: rgba(255,255,255,0.09);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+        }
+        .toggle-pw {
+            position: absolute;
+            right: 14px; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: none;
+            cursor: pointer;
+            font-size: 15px;
+            opacity: 0.35;
+            transition: opacity 0.15s;
+            padding: 0;
+        }
+        .toggle-pw:hover { opacity: 0.65; }
+
+        /* ── Error ── */
+        .error-box {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: rgba(220,38,38,0.12);
+            border: 1px solid rgba(220,38,38,0.3);
+            border-radius: 10px;
+            padding: 11px 14px;
+            margin-bottom: 18px;
+        }
+        .error-box.show { display: flex; }
+        .error-box span { font-size: 13px; color: #fca5a5; }
+
+        /* ── Submit ── */
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #800000 0%, #5c0000 100%);
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            letter-spacing: 0.2px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+            transition: opacity 0.2s, transform 0.15s;
+            margin-top: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(201,168,76,0.15) 0%, transparent 60%);
+            border-radius: inherit;
+        }
+        .btn-submit:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+        .btn-submit:active:not(:disabled) { transform: translateY(0); }
+        .btn-submit:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+        /* ── Footer ── */
+        .card-footer {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255,255,255,0.22);
+            line-height: 1.7;
+        }
+        .card-footer strong { color: rgba(255,255,255,0.35); font-weight: 600; }
+
+        /* ── Spinner ── */
+        .spinner {
+            display: inline-block;
+            width: 14px; height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
-<body class="bg-gray-100 h-screen flex items-center justify-center">
-    <div class="bg-white p-8 rounded-lg shadow-md w-96">
-        <div class="text-center mb-6">
-            <h2 class="text-2xl font-bold text-red-800">SMA ABBS</h2>
-            <p class="text-sm text-gray-500">Portal Petugas Akhirussanah</p>
+<body>
+
+<div class="card">
+    <!-- Header -->
+    <div class="card-header">
+        <div class="logo-ring">
+            <img src="./logo_sma_abbs_surakarta.png" alt="Logo"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <span class="logo-fallback" style="display:none">A</span>
         </div>
-        
-        <form id="loginForm" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Email Akses</label>
-                <input type="email" id="email" required class="mt-1 w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-red-800 outline-none" placeholder="Cth: guru@akhiru.id">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Password</label>
-                <input type="password" id="password" required class="mt-1 w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-red-800 outline-none">
-            </div>
-            <button type="submit" id="btnSubmit" class="w-full bg-red-800 text-white font-bold py-2 rounded hover:bg-red-900 transition">
-                Masuk
-            </button>
-        </form>
-        <p id="errorMsg" class="text-red-500 text-sm mt-3 text-center hidden"></p>
+        <h1>SMA ABBS</h1>
+        <p>Portal Petugas Akhirussanah</p>
+        <div class="divider"></div>
     </div>
 
+    <!-- Error -->
+    <div class="error-box" id="errorBox">
+        <span>⚠️</span>
+        <span id="errorMsg">Email atau password salah.</span>
+    </div>
+
+    <!-- Form -->
+    <form id="loginForm">
+        <div class="field">
+            <label>Email Akses</label>
+            <div class="input-wrap">
+                <span class="input-icon">✉️</span>
+                <input type="email" id="email" required placeholder="nama@akhiru.id" autocomplete="email">
+            </div>
+        </div>
+        <div class="field">
+            <label>Password</label>
+            <div class="input-wrap">
+                <span class="input-icon">🔒</span>
+                <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password">
+                <button type="button" class="toggle-pw" id="togglePw" tabindex="-1">👁</button>
+            </div>
+        </div>
+        <button type="submit" id="btnSubmit" class="btn-submit">Masuk</button>
+    </form>
+
+    <!-- Footer -->
+    <div class="card-footer">
+        <strong>Khusus Guru & Panitia</strong><br>
+        Hubungi admin jika Anda lupa kata sandi
+    </div>
+</div>
+
 <script>
-    const supabaseClient = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
+    const supabaseClient = supabase.createClient(
+        'https://cckmxdlirnfdhzsgvgne.supabase.co',
+        'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z'
+    );
 
     // 1. Pengecekan saat halaman pertama kali dibuka
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
         if (session) {
-            // Cek apakah email yang sedang login mengandung kata "panitia"
             if (session.user.email.includes('panitia')) {
                 window.location.replace('scan.html');
             } else {
@@ -45,16 +289,25 @@
         }
     });
 
+    // Toggle show/hide password
+    document.getElementById('togglePw').addEventListener('click', () => {
+        const pw = document.getElementById('password');
+        const btn = document.getElementById('togglePw');
+        if (pw.type === 'password') { pw.type = 'text'; btn.textContent = '🙈'; }
+        else { pw.type = 'password'; btn.textContent = '👁'; }
+    });
+
     // 2. Proses saat tombol Masuk ditekan
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSubmit');
-        const err = document.getElementById('errorMsg');
+        const errorBox = document.getElementById('errorBox');
+        const errorMsg = document.getElementById('errorMsg');
         const inputEmail = document.getElementById('email').value;
-        
-        btn.innerText = "Memeriksa..."; 
-        btn.disabled = true; 
-        err.classList.add('hidden');
+
+        btn.innerHTML = '<span class="spinner"></span>Memeriksa…';
+        btn.disabled = true;
+        errorBox.classList.remove('show');
 
         const { error } = await supabaseClient.auth.signInWithPassword({
             email: inputEmail,
@@ -62,20 +315,19 @@
         });
 
         if (error) {
-            err.innerText = "Email atau password salah!";
-            err.classList.remove('hidden');
-            btn.innerText = "Masuk"; 
+            errorMsg.textContent = 'Email atau password salah. Silakan coba lagi.';
+            errorBox.classList.add('show');
+            btn.innerHTML = 'Masuk';
             btn.disabled = false;
         } else {
-            alert("Berhasil masuk! Mengarahkan ke halaman...");
+            btn.innerHTML = '✓ Berhasil — Mengarahkan…';
             setTimeout(() => {
-                // Arahkan ke halaman yang sesuai dengan akun
                 if (inputEmail.includes('panitia')) {
                     window.location.replace('scan.html');
                 } else {
-                    window.location.replace('admin.html'); 
+                    window.location.replace('admin.html');
                 }
-            }, 1000);
+            }, 900);
         }
     });
 </script>
