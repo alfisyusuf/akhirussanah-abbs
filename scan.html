@@ -26,9 +26,15 @@
             <p id="modalNama" class="text-xl text-red-800 font-bold mb-1"></p>
             <p id="modalKelas" class="text-sm text-gray-500 mb-4"></p>
 
-            <div class="bg-blue-50 text-blue-800 p-3 rounded-lg mb-5 text-sm border border-blue-100">
+            <div class="bg-blue-50 text-blue-800 p-3 rounded-lg mb-3 text-sm border border-blue-100">
                 Data Konfirmasi Web:<br>
                 <span id="modalKonf" class="font-bold text-base"></span>
+            </div>
+
+            <div id="modalPeringatan" class="hidden bg-yellow-50 text-yellow-800 p-3 rounded-lg mb-4 text-sm border border-yellow-300">
+                ⚠️ <span class="font-bold">Tamu Sudah Check-in!</span><br>
+                Tercatat masuk sebelumnya: <span id="modalTercatat" class="font-bold text-lg text-red-600"></span> Orang.<br>
+                <span class="text-xs text-yellow-700 mt-1 block">Pilih angka di bawah HANYA JIKA Anda ingin menimpa/mengubah data sebelumnya.</span>
             </div>
 
             <p class="mb-3 text-sm font-medium text-gray-600">Berapa jumlah riil yang masuk saat ini?</p>
@@ -117,7 +123,6 @@
         window.location.replace('login.html');
     }
 
-    // Mengambil data untuk tabel riwayat (Menarik jumlah_hadir_riil)
     async function loadHadirData() {
         const { data, error } = await supabaseClient
             .from('undangan')
@@ -188,20 +193,28 @@
         document.getElementById('resultCard').classList.add('hidden'); 
         document.getElementById('errorCard').classList.add('hidden');
 
+        // TAMBAHAN: Kita menarik kolom jumlah_hadir_riil juga di sini
         const { data, error } = await supabaseClient.from('undangan')
-            .select('id, nama, kelas, konf_ortu, hadir_hari_h').eq('qr_token', decodedText).single();
+            .select('id, nama, kelas, konf_ortu, hadir_hari_h, jumlah_hadir_riil').eq('qr_token', decodedText).single();
         
         if(data) {
-            if (data.hadir_hari_h) {
-                alert("⚠️ PERHATIAN: Undangan atas nama " + data.nama + " SUDAH CHECK-IN sebelumnya! Jika ini rombongan susulan, Anda bisa mengubah angka riilnya.");
-            }
-            
-            idScanSaatIni = data.id; // Simpan ID
+            idScanSaatIni = data.id; 
             document.getElementById('modalNama').innerText = data.nama;
             document.getElementById('modalKelas').innerText = "Kelas " + data.kelas;
             document.getElementById('modalKonf').innerText = data.konf_ortu || "Belum Mengisi Form Web";
             
-            // Tampilkan Modal
+            const peringatanBox = document.getElementById('modalPeringatan');
+            
+            // LOGIKA BARU: Cek apakah sudah hadir sebelumnya
+            if (data.hadir_hari_h) {
+                // Tampilkan kotak kuning & isi angkanya
+                document.getElementById('modalTercatat').innerText = data.jumlah_hadir_riil || 0;
+                peringatanBox.classList.remove('hidden');
+            } else {
+                // Sembunyikan kotak kuning jika ini scan pertama kali
+                peringatanBox.classList.add('hidden');
+            }
+            
             document.getElementById('modalRiil').classList.remove('hidden');
         } else {
             document.getElementById('errorCard').classList.remove('hidden');
@@ -211,23 +224,20 @@
 
     // 2. TAHAP KEDUA: Saat Tombol Angka (1, 2, 3+) di Klik
     async function simpanRiil(jumlah) {
-        document.getElementById('modalRiil').classList.add('hidden'); // Tutup modal
+        document.getElementById('modalRiil').classList.add('hidden'); 
 
-        // Update database: Tandai hadir = true, dan simpan angka riilnya
         await supabaseClient.from('undangan').update({ 
             hadir_hari_h: true, 
             jumlah_hadir_riil: jumlah 
         }).eq('id', idScanSaatIni);
         
-        // Tampilkan pesan sukses di bawah kamera
         const resCard = document.getElementById('resultCard');
         resCard.classList.remove('hidden');
         document.getElementById('scannedName').innerText = document.getElementById('modalNama').innerText;
         document.getElementById('scannedClass').innerText = "Tercatat Masuk: " + jumlah + " Orang";
         
-        loadHadirData(); // Segarkan tabel dan jumlah total di layar
+        loadHadirData(); 
 
-        // Beri jeda 2 detik sebelum kamera bisa baca QR selanjutnya
         setTimeout(() => { 
             resCard.classList.add('hidden'); 
             isScanning = false; 
