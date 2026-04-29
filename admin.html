@@ -482,7 +482,21 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
     }
     muatTemplate();
 
-    function insertVar(val) { txtMessage.value += val; }
+    function insertVar(val) {
+        // Membaca di mana kursor berada saat ini
+        const startPos = txtMessage.selectionStart;
+        const endPos = txtMessage.selectionEnd;
+        
+        // Memecah teks asli, lalu menyelipkan variabel di tengahnya
+        txtMessage.value = txtMessage.value.substring(0, startPos) 
+                        + val 
+                        + txtMessage.value.substring(endPos, txtMessage.value.length);
+        
+        // Kembalikan fokus kursor ke kotak teks tepat setelah variabel yang baru disisipkan
+        txtMessage.focus();
+        txtMessage.selectionStart = startPos + val.length;
+        txtMessage.selectionEnd = startPos + val.length;
+    }
 
     async function simpanPesan() {
         const btn = event.target;
