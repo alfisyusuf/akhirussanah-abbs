@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lembar Mutasi XII 6</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
+        }
+        .controls {
+            text-align: center;
+            padding: 20px;
+            background: #fff;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #d1d5db;
+        }
+        .btn-print {
+            background-color: #2563eb;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn-print:hover {
+            background-color: #1d4ed8;
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm 20mm;
+            margin: 10mm auto;
+            background: white;
+            box-sizing: border-box;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+        .student-info {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 6px 8px;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-size: 13px;
+            font-weight: normal;
+            text-align: center;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .header-keluar {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .signature-block {
+            font-size: 13px;
+            padding-left: 5px;
+            line-height: 1.4;
+        }
+        .signature-space {
+            height: 55px;
+        }
+        .empty-row td {
+            height: 180px;
+        }
+        .date-col, .class-col, .reason-col {
+            text-align: center;
+            font-size: 14px;
+        }
+
+        @media print {
+            body {
+                background: none;
+                margin: 0;
+            }
+            .controls {
+                display: none;
+            }
+            .page {
+                margin: 0;
+                box-shadow: none;
+                page-break-after: always;
+            }
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <p>File ini berisi 30 halaman (untuk 30 siswa). Klik tombol di bawah untuk mencetak langsung ke kertas A4.</p>
+        <button class="btn-print" onclick="window.print()">Cetak Semua Lembar (A4)</button>
+    </div>
+
+    <div id="document-container"></div>
+
+    <script>
+        const dataSiswa = [
+            { "nama": "Abyanu Ar Rasyid" },
+            { "nama": "Aldi Raditya Satria" },
+            { "nama": "Alvino Putra Athailla" },
+            { "nama": "Anas Fadhila Shidiq Prasetya" },
+            { "nama": "Ardi Hafizh Wibowo" },
+            { "nama": "Arfian Janni Alfa Zahry" },
+            { "nama": "Arrauf Rozan Attailah" },
+            { "nama": "Arsavin Ibnu Shabir" },
+            { "nama": "Daffa Ulhaq" },
+            { "nama": "Dzaki Azfar Abdullah" },
+            { "nama": "Fairuz Ananta Afla" },
+            { "nama": "Galih Fajar Anggoro" },
+            { "nama": "Gaza Fadlian Tezar" },
+            { "nama": "Gerald Fawwaszain Arkananggara" },
+            { "nama": "Ivandhia Naufalathif" },
+            { "nama": "Kafeel Aizat Rayyansyah" },
+            { "nama": "Khalil Firja Athaillah" },
+            { "nama": "M. Rizky Fadega Pulungan" },
+            { "nama": "Mardhika Hadi Widiatmoko" },
+            { "nama": "Muhammad Ammar Al Bahy" },
+            { "nama": "Muhammad Fikriyaskuri Eko Setiawan" },
+            { "nama": "Muhammad Furqon Mahzum Arsyad" },
+            { "nama": "Muhammad Yoga Satriya Atmadja" },
+            { "nama": "Naylendra Pakarti Luhur" },
+            { "nama": "Panggih Aryasatya Priyanto" },
+            { "nama": "Raditya Arya Bajra Sanjaya" },
+            { "nama": "Rayhan Nawfal Akbar" },
+            { "nama": "Revansa Nadhifanditya Aghadhiaulhaq Santoso" },
+            { "nama": "Roja Natandya Maheswara" },
+            { "nama": "Yuan Pradipa Cakrawardhana" }
+        ];
+        
+        const kelasSiswa = "XII. 6";
+        const container = document.getElementById("document-container");
+
+        dataSiswa.forEach(siswa => {
+            const page = document.createElement("div");
+            page.className = "page";
+
+            page.innerHTML = `
+                <div class="title">KETERANGAN PINDAH SEKOLAH</div>
+                <div class="student-info">NAMA SISWA : ${siswa.nama}</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="4" class="header-keluar">KELUAR</th>
+                        </tr>
+                        <tr>
+                            <th style="width: 12%;">Tanggal</th>
+                            <th style="width: 15%;">Kelas yang<br>Ditinggalkan</th>
+                            <th style="width: 25%;">Sebab-sebab Keluar<br>atau Atas Permintaan<br>(Tertulis)</th>
+                            <th style="width: 48%;">Tanda Tangan Kepala<br>Sekolah, Stempel Sekolah,<br>dan Tanda Tangan Orang<br>Tua/Wali</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="date-col">5 Mei<br>2026</td>
+                            <td class="class-col">${kelasSiswa}</td>
+                            <td class="reason-col">LULUS</td>
+                            <td>
+                                <div class="signature-block">
+                                    Surakarta, 5 Mei 2026<br>
+                                    Kepala Sekolah,<br>
+                                    <div class="signature-space"></div>
+                                    <u><b>Mira Tridiana, M.Pd.</b></u><br>
+                                    NIP. -<br><br>
+                                    Orang Tua/Wali,<br>
+                                    <div class="signature-space"></div>
+                                    _______________________
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="empty-row">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <div class="signature-block">
+                                    ____________, _________<br>
+                                    Kepala Sekolah,<br>
+                                    <div class="signature-space"></div>
+                                    _______________________<br>
+                                    NIP<br><br>
+                                    Orang Tua/Wali,<br>
+                                    <div class="signature-space"></div>
+                                    _______________________
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="empty-row">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <div class="signature-block">
+                                    ____________, _________<br>
+                                    Kepala Sekolah,<br>
+                                    <div class="signature-space"></div>
+                                    _______________________<br>
+                                    NIP<br><br>
+                                    Orang Tua/Wali,<br>
+                                    <div class="signature-space"></div>
+                                    _______________________
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            container.appendChild(page);
+        });
+    </script>
+</body>
+</html>
