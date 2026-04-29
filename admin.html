@@ -525,7 +525,8 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
                 const domain = window.location.origin;
                 const linkUndangan = `${domain}/?token=${student.qr_token}`;
                 let msg = txtMessage.value.replace(/{nama}/g, student.nama).replace(/{link}/g, linkUndangan);
-                const encodedMsg = encodeURIComponent(msg);
+                // Gunakan cara pengkodean yang lebih aman untuk karakter Unicode / Arab
+                const encodedMsg = encodeURIComponent(msg).replace(/%E2%80%8E/g, '');
 
                 const hadirBadge = student.hadir_hari_h
                     ? `<span class="badge-hadir">✔ Check-in</span>`
