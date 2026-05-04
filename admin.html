@@ -10,354 +10,96 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
-
         body { background: #f5f3ef; }
 
         /* ── Navbar ── */
-        .navbar {
-            background: #7f1d1d;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.18);
-        }
-        .navbar-inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 1rem;
-            height: 56px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .navbar-title {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #fff;
-            letter-spacing: -0.01em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .navbar-title span.badge {
-            font-size: 10px;
-            font-weight: 600;
-            background: rgba(255,255,255,0.18);
-            color: #fca5a5;
-            padding: 2px 7px;
-            border-radius: 99px;
-            letter-spacing: 0.04em;
-        }
+        .navbar { background: #7f1d1d; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 12px rgba(0,0,0,0.18); }
+        .navbar-inner { display: flex; align-items: center; justify-content: space-between; padding: 0 1rem; height: 56px; max-width: 900px; margin: 0 auto; }
+        .navbar-title { font-weight: 700; font-size: 1rem; color: #fff; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+        .navbar-title span.badge { font-size: 10px; font-weight: 600; background: rgba(255,255,255,0.18); color: #fca5a5; padding: 2px 7px; border-radius: 99px; letter-spacing: 0.04em; }
         .navbar-actions { display: flex; gap: 8px; align-items: center; }
-        .btn-scanner {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(255,255,255,0.12);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: background 0.15s;
-        }
+        .btn-scanner { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.15s; }
         .btn-scanner:hover { background: rgba(255,255,255,0.22); }
-        .btn-logout {
-            background: #fff;
-            color: #7f1d1d;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
+        .btn-logout { background: #fff; color: #7f1d1d; border: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
         .btn-logout:hover { background: #fee2e2; }
 
         /* ── Main Layout ── */
-        .main-wrap {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 1.25rem 1rem 2.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
+        .main-wrap { max-width: 900px; margin: 0 auto; padding: 1.25rem 1rem 2.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+        /* ── TABS ── */
+        .tabs { display: flex; gap: 8px; border-bottom: 2px solid #e7e5e4; margin-bottom: 4px; }
+        .tab-btn { padding: 10px 16px; font-weight: 600; font-size: 14px; color: #78716c; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.2s; }
+        .tab-btn:hover { color: #1c1917; }
+        .tab-btn.active { color: #7f1d1d; border-bottom-color: #7f1d1d; }
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 1.25rem; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* ── Card ── */
-        .card {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-            overflow: hidden;
-        }
-        .card-header {
-            padding: 14px 18px 10px;
-            border-bottom: 1px solid #f3f0ec;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        .card-title {
-            font-weight: 700;
-            font-size: 15px;
-            color: #1c1917;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-        }
-        .card-title .icon {
-            width: 28px;
-            height: 28px;
-            background: #fef2f2;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow: hidden; }
+        .card-header { padding: 14px 18px 10px; border-bottom: 1px solid #f3f0ec; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;}
+        .card-title { font-weight: 700; font-size: 15px; color: #1c1917; display: flex; align-items: center; gap: 7px; }
+        .card-title .icon { width: 28px; height: 28px; background: #fef2f2; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
         .card-body { padding: 16px 18px; }
 
+        /* ── Summary Stats ── */
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;}
+        .stat-box { background: #fafaf9; border: 1px solid #e7e5e4; border-radius: 12px; padding: 16px; text-align: center; }
+        .stat-box.active-room { background: #f0fdf4; border-color: #bbf7d0; }
+        .stat-label { font-size: 12px; font-weight: 600; color: #78716c; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .stat-value { font-size: 32px; font-weight: 700; color: #1c1917; }
+        .stat-box.active-room .stat-value { color: #166534; }
+        .stat-box.active-room .stat-label { color: #15803d; }
+        .stat-desc { font-size: 12px; color: #a8a29e; }
+
         /* ── Broadcast Panel ── */
-        .var-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #bfdbfe;
-            border-radius: 6px;
-            padding: 4px 10px;
-            font-size: 12px;
-            font-family: 'Courier New', monospace;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
+        .var-btn { display: inline-flex; align-items: center; gap: 4px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-family: 'Courier New', monospace; font-weight: 600; cursor: pointer; transition: background 0.15s; }
         .var-btn:hover { background: #dbeafe; }
-        .var-hint {
-            font-size: 12px;
-            color: #78716c;
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        .wa-textarea {
-            width: 100%;
-            border: 1.5px solid #e7e5e4;
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 14px;
-            line-height: 1.6;
-            resize: vertical;
-            min-height: 150px;
-            background: #fafaf9;
-            color: #1c1917;
-            transition: border-color 0.15s, box-shadow 0.15s;
-            box-sizing: border-box;
-        }
-        .wa-textarea:focus {
-            outline: none;
-            border-color: #b91c1c;
-            box-shadow: 0 0 0 3px rgba(185,28,28,0.1);
-            background: #fff;
-        }
-        .btn-save {
-            display: block;
-            width: 100%;
-            margin-top: 10px;
-            padding: 11px;
-            background: #15803d;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.15s, transform 0.1s;
-        }
+        .var-hint { font-size: 12px; color: #78716c; margin-bottom: 10px; line-height: 1.5; }
+        .wa-textarea { width: 100%; border: 1.5px solid #e7e5e4; border-radius: 10px; padding: 12px; font-size: 14px; line-height: 1.6; resize: vertical; min-height: 150px; background: #fafaf9; color: #1c1917; transition: border-color 0.15s, box-shadow 0.15s; box-sizing: border-box; }
+        .wa-textarea:focus { outline: none; border-color: #b91c1c; box-shadow: 0 0 0 3px rgba(185,28,28,0.1); background: #fff; }
+        .btn-save { display: block; width: 100%; margin-top: 10px; padding: 11px; background: #15803d; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s, transform 0.1s; }
         .btn-save:hover { background: #166534; }
         .btn-save:active { transform: scale(0.98); }
         .btn-save:disabled { background: #86efac; cursor: default; }
 
         /* ── Filter & Table Area ── */
-        .filter-select {
-            background: #fafaf9;
-            border: 1.5px solid #e7e5e4;
-            border-radius: 8px;
-            padding: 6px 10px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #1c1917;
-            cursor: pointer;
-            transition: border-color 0.15s;
-        }
+        .filter-select { background: #fafaf9; border: 1.5px solid #e7e5e4; border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 500; color: #1c1917; cursor: pointer; transition: border-color 0.15s; }
         .filter-select:focus { outline: none; border-color: #b91c1c; }
 
-        /* ── MOBILE CARD LIST (shown on small screens) ── */
+        /* ── MOBILE CARD LIST ── */
         .student-cards { display: flex; flex-direction: column; gap: 10px; }
-        .student-card {
-            background: #fafaf9;
-            border: 1px solid #f3f0ec;
-            border-radius: 12px;
-            padding: 13px 14px;
-        }
-        .student-card-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
+        .student-card { background: #fafaf9; border: 1px solid #f3f0ec; border-radius: 12px; padding: 13px 14px; }
+        .student-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
         .student-name { font-weight: 700; font-size: 14px; color: #1c1917; }
-        .student-class {
-            font-size: 11px;
-            font-weight: 600;
-            background: #fef2f2;
-            color: #b91c1c;
-            border: 1px solid #fecaca;
-            padding: 3px 8px;
-            border-radius: 99px;
-        }
-        .student-conf {
-            font-size: 12px;
-            color: #78716c;
-            margin-bottom: 10px;
-            display: flex;
-            gap: 16px;
-        }
+        .student-class { font-size: 11px; font-weight: 600; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 3px 8px; border-radius: 99px; }
+        .student-conf { font-size: 12px; color: #78716c; margin-bottom: 10px; display: flex; gap: 16px; }
         .conf-item span.label { color: #a8a29e; }
         .conf-item span.val { font-weight: 600; color: #1c1917; }
-        .badge-hadir {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            background: #f0fdf4;
-            color: #15803d;
-            border: 1px solid #bbf7d0;
-            padding: 3px 9px;
-            border-radius: 99px;
-        }
-        .badge-belum {
-            font-size: 11px;
-            color: #a8a29e;
-            background: #f5f5f4;
-            border: 1px solid #e7e5e4;
-            padding: 3px 9px;
-            border-radius: 99px;
-        }
+        .badge-hadir { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; padding: 3px 9px; border-radius: 99px; }
+        .badge-belum { font-size: 11px; color: #a8a29e; background: #f5f5f4; border: 1px solid #e7e5e4; padding: 3px 9px; border-radius: 99px; }
         .wa-actions { display: flex; gap: 7px; margin-top: 10px; }
-        .btn-wa-ayah {
-            flex: 1;
-            padding: 9px 0;
-            background: #2563eb;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            text-decoration: none;
-            text-align: center;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .btn-wa-ayah:hover { background: #1d4ed8; }
-        .btn-wa-ibu {
-            flex: 1;
-            padding: 9px 0;
-            background: #db2777;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            text-decoration: none;
-            text-align: center;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .btn-wa-ibu:hover { background: #be185d; }
+        .btn-wa-ayah, .btn-wa-ibu { flex: 1; padding: 9px 0; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; text-align: center; cursor: pointer; transition: background 0.15s; }
+        .btn-wa-ayah { background: #2563eb; } .btn-wa-ayah:hover { background: #1d4ed8; }
+        .btn-wa-ibu { background: #db2777; } .btn-wa-ibu:hover { background: #be185d; }
 
-        /* ── DESKTOP TABLE (hidden on small screens) ── */
+        /* ── DESKTOP TABLE ── */
         .table-wrap { overflow-x: auto; }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        .data-table th {
-            background: #fafaf9;
-            color: #78716c;
-            font-weight: 600;
-            font-size: 11.5px;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            padding: 10px 14px;
-            border-bottom: 1.5px solid #f3f0ec;
-            white-space: nowrap;
-        }
-        .data-table td {
-            padding: 11px 14px;
-            border-bottom: 1px solid #f5f3f0;
-            vertical-align: middle;
-            color: #1c1917;
-        }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th { background: #fafaf9; color: #78716c; font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 14px; border-bottom: 1.5px solid #f3f0ec; white-space: nowrap; text-align: left;}
+        .data-table td { padding: 11px 14px; border-bottom: 1px solid #f5f3f0; vertical-align: middle; color: #1c1917; }
         .data-table tr:last-child td { border-bottom: none; }
         .data-table tr:hover td { background: #fef2f2; }
         .data-table .name-cell { font-weight: 600; }
-        .data-table .kelas-pill {
-            display: inline-block;
-            background: #fef2f2;
-            color: #b91c1c;
-            border: 1px solid #fecaca;
-            padding: 2px 8px;
-            border-radius: 99px;
-            font-size: 11px;
-            font-weight: 600;
-        }
+        .data-table .kelas-pill { display: inline-block; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
         .data-table .konf-cell { font-size: 12px; color: #78716c; line-height: 1.6; }
         .data-table .konf-cell strong { color: #1c1917; font-weight: 600; }
-        .tbl-wa-btn-ayah {
-            display: block;
-            padding: 5px 10px;
-            background: #2563eb;
-            color: #fff;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            text-align: center;
-            white-space: nowrap;
-            transition: background 0.15s;
-        }
-        .tbl-wa-btn-ayah:hover { background: #1d4ed8; }
-        .tbl-wa-btn-ibu {
-            display: block;
-            margin-top: 4px;
-            padding: 5px 10px;
-            background: #db2777;
-            color: #fff;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            text-align: center;
-            white-space: nowrap;
-            transition: background 0.15s;
-        }
-        .tbl-wa-btn-ibu:hover { background: #be185d; }
+        .tbl-wa-btn-ayah, .tbl-wa-btn-ibu { display: block; padding: 5px 10px; color: #fff; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; transition: background 0.15s; }
+        .tbl-wa-btn-ayah { background: #2563eb; } .tbl-wa-btn-ayah:hover { background: #1d4ed8; }
+        .tbl-wa-btn-ibu { margin-top: 4px; background: #db2777; } .tbl-wa-btn-ibu:hover { background: #be185d; }
 
         /* ── Empty State ── */
-        .empty-state {
-            text-align: center;
-            padding: 36px 20px;
-            color: #a8a29e;
-            font-size: 14px;
-        }
+        .empty-state { text-align: center; padding: 36px 20px; color: #a8a29e; font-size: 14px; }
 
         /* ── Responsive show/hide ── */
         @media (max-width: 700px) {
@@ -372,7 +114,6 @@
 </head>
 <body>
 
-<!-- ══ NAVBAR ══ -->
 <nav class="navbar">
     <div class="navbar-inner">
         <div class="navbar-title">
@@ -386,68 +127,124 @@
     </div>
 </nav>
 
-<!-- ══ MAIN ══ -->
 <div class="main-wrap">
 
-    <!-- Broadcast WA -->
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title">
-                <div class="icon">💬</div>
-                Broadcast WhatsApp
+    <!-- Sistem Tab -->
+    <div class="tabs">
+        <div class="tab-btn active" onclick="switchTab('tabData')">Data Master & WA</div>
+        <div class="tab-btn" onclick="switchTab('tabRekap')">Rekapitulasi Kehadiran</div>
+    </div>
+
+    <!-- ==================== TAB 1: DATA MASTER ==================== -->
+    <div id="tabData" class="tab-content active">
+        
+        <!-- Broadcast WA -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <div class="icon">💬</div> Broadcast WhatsApp
+                </div>
             </div>
-        </div>
-        <div class="card-body">
-            <p class="var-hint">Sisipkan variabel dinamis ke dalam template pesan Anda:</p>
-            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-                <button onclick="insertVar('{nama}')" class="var-btn">＋ {nama}</button>
-                <button onclick="insertVar('{link}')" class="var-btn">＋ {link}</button>
-            </div>
-            <textarea id="waMessage" class="wa-textarea">Assalamu'alaikum Bapak/Ibu wali dari {nama}. 
+            <div class="card-body">
+                <p class="var-hint">Sisipkan variabel dinamis ke dalam template pesan Anda:</p>
+                <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                    <button onclick="insertVar('{nama}')" class="var-btn">＋ {nama}</button>
+                    <button onclick="insertVar('{link}')" class="var-btn">＋ {link}</button>
+                </div>
+                <textarea id="waMessage" class="wa-textarea">Assalamu'alaikum Bapak/Ibu wali dari {nama}. 
 
 Mengharap kehadiran Bapak/Ibu dalam acara Akhirussanah Kelas XII. Berikut adalah tautan undangan dan tiket masuk digital Anda:
 {link}
 
 Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textarea>
-            <button onclick="simpanPesan()" class="btn-save">💾 Simpan Template Pesan</button>
+                <button onclick="simpanPesan()" class="btn-save">💾 Simpan Template Pesan</button>
+            </div>
+        </div>
+
+        <!-- Data Seluruh Siswa -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <div class="icon">📋</div> Data Konfirmasi Siswa
+                </div>
+                <select id="filterKelasData" class="filter-select" onchange="renderDataTab()">
+                    <option value="ALL">Semua Kelas</option>
+                </select>
+            </div>
+
+            <!-- MOBILE List -->
+            <div class="card-body mobile-cards" style="display:none;">
+                <div id="studentCardList" class="student-cards">
+                    <div class="empty-state">⏳ Memuat data…</div>
+                </div>
+            </div>
+
+            <!-- DESKTOP Table -->
+            <div class="desktop-table table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nama Siswa</th>
+                            <th>Kelas</th>
+                            <th>Status Konfirmasi Web</th>
+                            <th style="text-align:center;">Check-in (In/Out)</th>
+                            <th style="text-align:center;">Kirim WA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTable">
+                        <tr><td colspan="5" class="empty-state">⏳ Memuat data…</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- Data Kehadiran -->
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title">
-                <div class="icon">📋</div>
-                Data Kehadiran
-            </div>
-            <select id="filterKelas" class="filter-select" onchange="loadData()">
-                <option value="ALL">Semua Kelas</option>
+
+    <!-- ==================== TAB 2: REKAPITULASI ==================== -->
+    <div id="tabRekap" class="tab-content">
+        
+        <!-- Filter Spesifik Rekap -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: -10px;">
+            <select id="filterKelasRekap" class="filter-select" onchange="renderRekapTab()">
+                <option value="ALL">Rekap Semua Kelas</option>
             </select>
         </div>
 
-        <!-- MOBILE: Card List -->
-        <div class="card-body mobile-cards" style="display:none;">
-            <div id="studentCardList" class="student-cards">
-                <div class="empty-state">⏳ Memuat data…</div>
+        <!-- Kotak Rekapitulasi -->
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="stat-label">Total Pernah Hadir</div>
+                <div class="stat-value" id="rekapHadir">0</div>
+                <div class="stat-desc">Ayah/Ibu yang pernah Check-in</div>
+            </div>
+            <div class="stat-box active-room">
+                <div class="stat-label">Di Dalam Ruangan</div>
+                <div class="stat-value" id="rekapDalam">0</div>
+                <div class="stat-desc">Ayah/Ibu yang posisinya di dalam</div>
             </div>
         </div>
 
-        <!-- DESKTOP: Table -->
-        <div class="desktop-table table-wrap">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Nama Siswa</th>
-                        <th>Kelas</th>
-                        <th>Status Konfirmasi</th>
-                        <th style="text-align:center;">Kehadiran</th>
-                        <th style="text-align:center;">Kirim WA</th>
-                    </tr>
-                </thead>
-                <tbody id="studentTable">
-                    <tr><td colspan="5" class="empty-state">⏳ Memuat data…</td></tr>
-                </tbody>
-            </table>
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <div class="icon">📊</div> Detail Tamu yang Hadir
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nama Siswa (Keluarga)</th>
+                            <th>Kelas</th>
+                            <th style="text-align:center;">Status Ayah</th>
+                            <th style="text-align:center;">Status Ibu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rekapTable">
+                        <tr><td colspan="4" class="empty-state">Belum ada tamu yang masuk.</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -455,13 +252,12 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
 
 <script>
     const supabaseClient = supabase.createClient('https://cckmxdlirnfdhzsgvgne.supabase.co', 'sb_publishable_knnp-v7sGFE7PtOZuedsWg_EOsDS0-z');
+    let allData = []; // Menyimpan semua data dari DB
 
+    // ── AUTENTIKASI ──
     async function checkAuth() {
         const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) {
-            window.location.replace('login.html');
-            return;
-        }
+        if (!session) { window.location.replace('login.html'); return; }
         if (session.user.email.includes('panitia')) {
             alert("Akses Ditolak! Halaman Dasbor ini khusus untuk Guru/Admin.");
             window.location.replace('scan.html');
@@ -474,120 +270,113 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
         window.location.replace('login.html');
     }
 
-    const txtMessage = document.getElementById('waMessage');
+    // ── TAB SWITCHER ──
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+        
+        // Render ulang tabel yang aktif agar filternya bekerja terpisah
+        if(tabId === 'tabData') renderDataTab();
+        if(tabId === 'tabRekap') renderRekapTab();
+    }
 
+    // ── FITUR WHATSAPP ──
+    const txtMessage = document.getElementById('waMessage');
     async function muatTemplate() {
-        const { data, error } = await supabaseClient.from('pengaturan').select('nilai').eq('kunci', 'template_wa').single();
+        const { data } = await supabaseClient.from('pengaturan').select('nilai').eq('kunci', 'template_wa').single();
         if (data) txtMessage.value = data.nilai;
     }
     muatTemplate();
 
     function insertVar(val) {
-        // Membaca di mana kursor berada saat ini
         const startPos = txtMessage.selectionStart;
         const endPos = txtMessage.selectionEnd;
-        
-        // Memecah teks asli, lalu menyelipkan variabel di tengahnya
-        txtMessage.value = txtMessage.value.substring(0, startPos) 
-                        + val 
-                        + txtMessage.value.substring(endPos, txtMessage.value.length);
-        
-        // Kembalikan fokus kursor ke kotak teks tepat setelah variabel yang baru disisipkan
+        txtMessage.value = txtMessage.value.substring(0, startPos) + val + txtMessage.value.substring(endPos, txtMessage.value.length);
         txtMessage.focus();
         txtMessage.selectionStart = startPos + val.length;
         txtMessage.selectionEnd = startPos + val.length;
     }
 
     async function simpanPesan() {
-        const btn = event.target;
-        const teksAsli = btn.innerText;
-        btn.innerText = "⏳ Menyimpan ke server…";
-        btn.disabled = true;
-
+        const btn = event.target; const teksAsli = btn.innerText;
+        btn.innerText = "⏳ Menyimpan…"; btn.disabled = true;
         const { error } = await supabaseClient.from('pengaturan').update({ nilai: txtMessage.value }).eq('kunci', 'template_wa');
-
-        if (!error) {
-            alert('✅ Template WA berhasil disimpan secara global di database!');
-        } else {
-            alert('⚠️ Gagal menyimpan template ke server.');
-        }
-
-        btn.innerText = teksAsli;
-        btn.disabled = false;
+        if (!error) alert('✅ Template WA berhasil disimpan!'); else alert('⚠️ Gagal menyimpan template.');
+        btn.innerText = teksAsli; btn.disabled = false;
+        renderDataTab(); // Refresh link di tabel
     }
 
-    async function loadData() {
+    // ── MENGAMBIL DATA ──
+    async function fetchAllData() {
         const { data, error } = await supabaseClient.from('undangan').select('*').order('kelas').order('nama');
         if (error) return alert("Gagal mengambil data dari Supabase.");
-
+        
+        allData = data;
+        
+        // Isi dropdown filter
         const kelasSet = [...new Set(data.map(i => i.kelas))].sort();
-        const filter = document.getElementById('filterKelas');
-        if (filter.options.length === 1) {
-            kelasSet.forEach(k => filter.innerHTML += `<option value="${k}">${k}</option>`);
-        }
-
-        const selectedKelas = filter.value;
-        const filtered = data.filter(i => selectedKelas === 'ALL' || i.kelas === selectedKelas);
-
-        // ── Desktop Table ──
-        const tbody = document.getElementById('studentTable');
-        tbody.innerHTML = '';
-        if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Tidak ada data untuk kelas ini.</td></tr>`;
-        } else {
-            filtered.forEach(student => {
-                const domain = window.location.origin;
-                const linkUndangan = `${domain}/?token=${student.qr_token}`;
-                let msg = txtMessage.value.replace(/{nama}/g, student.nama).replace(/{link}/g, linkUndangan);
-                // Gunakan cara pengkodean yang lebih aman untuk karakter Unicode / Arab
-                const encodedMsg = encodeURIComponent(msg).replace(/%E2%80%8E/g, '');
-
-                const hadirBadge = student.hadir_hari_h
-                    ? `<span class="badge-hadir">✔ Check-in</span>`
-                    : `<span class="badge-belum">–</span>`;
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="name-cell">${student.nama}</td>
-                        <td><span class="kelas-pill">${student.kelas}</span></td>
-                        <td class="konf-cell">
-                            Anak: <strong>${student.konf_siswa}</strong><br>
-                            Wali: <strong>${student.konf_ortu}</strong>
-                        </td>
-                        <td style="text-align:center;">${hadirBadge}</td>
-                        <td style="text-align:center;min-width:100px;">
-                            ${student.Ayah ? `<a href="https://wa.me/${student.Ayah}?text=${encodedMsg}" target="_blank" class="tbl-wa-btn-ayah">👨 Bapak</a>` : ''}
-                            ${student.Ibu ? `<a href="https://wa.me/${student.Ibu}?text=${encodedMsg}" target="_blank" class="tbl-wa-btn-ibu">👩 Ibu</a>` : ''}
-                        </td>
-                    </tr>`;
+        const fData = document.getElementById('filterKelasData');
+        const fRekap = document.getElementById('filterKelasRekap');
+        if (fData.options.length === 1) {
+            kelasSet.forEach(k => {
+                fData.innerHTML += `<option value="${k}">${k}</option>`;
+                fRekap.innerHTML += `<option value="${k}">${k}</option>`;
             });
         }
 
-        // ── Mobile Cards ──
-        const cardList = document.getElementById('studentCardList');
-        cardList.innerHTML = '';
+        renderDataTab();
+        renderRekapTab();
+    }
+
+    // ── RENDER TAB DATA MASTER ──
+    function renderDataTab() {
+        const filterVal = document.getElementById('filterKelasData').value;
+        const filtered = filterVal === 'ALL' ? allData : allData.filter(i => i.kelas === filterVal);
+        
+        const tbodyDesk = document.getElementById('studentTable');
+        const listMobile = document.getElementById('studentCardList');
+        tbodyDesk.innerHTML = ''; listMobile.innerHTML = '';
+
         if (filtered.length === 0) {
-            cardList.innerHTML = `<div class="empty-state">Tidak ada data untuk kelas ini.</div>`;
-        } else {
-            filtered.forEach(student => {
-                const domain = window.location.origin;
-                const linkUndangan = `${domain}/?token=${student.qr_token}`;
-                let msg = txtMessage.value.replace(/{nama}/g, student.nama).replace(/{link}/g, linkUndangan);
-                const encodedMsg = encodeURIComponent(msg);
+            const emptyHTML = `<tr><td colspan="5" class="empty-state">Tidak ada data untuk kelas ini.</td></tr>`;
+            tbodyDesk.innerHTML = emptyHTML; listMobile.innerHTML = `<div class="empty-state">Tidak ada data.</div>`;
+            return;
+        }
 
-                const hadirBadge = student.hadir_hari_h
-                    ? `<span class="badge-hadir">✔ Check-in</span>`
-                    : `<span class="badge-belum">Belum hadir</span>`;
+        filtered.forEach(student => {
+            // URL WhatsApp
+            const domain = window.location.origin;
+            const linkUndangan = `${domain}/?token=${student.qr_token}`;
+            let msg = txtMessage.value.replace(/{nama}/g, student.nama).replace(/{link}/g, linkUndangan);
+            const encodedMsg = encodeURIComponent(msg).replace(/%E2%80%8E/g, '');
 
-                const waButtons = `
-                    <div class="wa-actions">
-                        ${student.Ayah ? `<a href="https://wa.me/${student.Ayah}?text=${encodedMsg}" target="_blank" class="btn-wa-ayah">👨 Bapak</a>` : ''}
-                        ${student.Ibu ? `<a href="https://wa.me/${student.Ibu}?text=${encodedMsg}" target="_blank" class="btn-wa-ibu">👩 Ibu</a>` : ''}
-                    </div>`;
+            // Logika Status Badge Ayah/Ibu
+            let hadirBadge = `<span class="badge-belum">Belum Hadir</span>`;
+            if (student.hadir_ayah || student.hadir_ibu) {
+                let det = [];
+                if (student.hadir_ayah) det.push('Ayah');
+                if (student.hadir_ibu) det.push('Ibu');
+                hadirBadge = `<span class="badge-hadir">✔ ${det.join(' & ')}</span>`;
+            }
 
-                const card = document.createElement('div');
-                card.className = 'student-card';
-                card.innerHTML = `
+            // Desktop
+            tbodyDesk.innerHTML += `
+                <tr>
+                    <td class="name-cell">${student.nama}</td>
+                    <td><span class="kelas-pill">${student.kelas}</span></td>
+                    <td class="konf-cell">Anak: <strong>${student.konf_siswa}</strong><br>Wali: <strong>${student.konf_ortu}</strong></td>
+                    <td style="text-align:center;">${hadirBadge}</td>
+                    <td style="text-align:center;min-width:100px;">
+                        ${student.Ayah ? `<a href="https://wa.me/${student.Ayah}?text=${encodedMsg}" target="_blank" class="tbl-wa-btn-ayah">👨 Bapak</a>` : ''}
+                        ${student.Ibu ? `<a href="https://wa.me/${student.Ibu}?text=${encodedMsg}" target="_blank" class="tbl-wa-btn-ibu">👩 Ibu</a>` : ''}
+                    </td>
+                </tr>`;
+
+            // Mobile
+            listMobile.innerHTML += `
+                <div class="student-card">
                     <div class="student-card-top">
                         <div class="student-name">${student.nama}</div>
                         <span class="student-class">${student.kelas}</span>
@@ -597,12 +386,62 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
                         <div class="conf-item"><span class="label">Wali </span><span class="val">${student.konf_ortu}</span></div>
                     </div>
                     <div>${hadirBadge}</div>
-                    ${waButtons}`;
-                cardList.appendChild(card);
+                    <div class="wa-actions">
+                        ${student.Ayah ? `<a href="https://wa.me/${student.Ayah}?text=${encodedMsg}" target="_blank" class="btn-wa-ayah">👨 Bapak</a>` : ''}
+                        ${student.Ibu ? `<a href="https://wa.me/${student.Ibu}?text=${encodedMsg}" target="_blank" class="btn-wa-ibu">👩 Ibu</a>` : ''}
+                    </div>
+                </div>`;
+        });
+    }
+
+    // ── RENDER TAB REKAPITULASI ──
+    function renderRekapTab() {
+        const filterVal = document.getElementById('filterKelasRekap').value;
+        const filtered = filterVal === 'ALL' ? allData : allData.filter(i => i.kelas === filterVal);
+        
+        let tHadir = 0;
+        let tDalam = 0;
+        const tbody = document.getElementById('rekapTable');
+        tbody.innerHTML = '';
+
+        // Ambil yang sudah pernah hadir saja
+        const hadirin = filtered.filter(s => s.hadir_ayah || s.hadir_ibu);
+
+        if (hadirin.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Belum ada tamu yang masuk dari kelas ini.</td></tr>`;
+        } else {
+            hadirin.forEach(siswa => {
+                const lblAyah = !siswa.hadir_ayah ? `<span style="color:#d6d3d1;">-</span>` 
+                              : (siswa.posisi_ayah === 'Dalam' ? `<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:99px; font-weight:700; font-size:11px;">Dalam</span>` 
+                                                              : `<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:99px; font-weight:700; font-size:11px;">Luar</span>`);
+                const lblIbu = !siswa.hadir_ibu ? `<span style="color:#d6d3d1;">-</span>` 
+                              : (siswa.posisi_ibu === 'Dalam' ? `<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:99px; font-weight:700; font-size:11px;">Dalam</span>` 
+                                                              : `<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:99px; font-weight:700; font-size:11px;">Luar</span>`);
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="name-cell">${siswa.nama}</td>
+                        <td><span class="kelas-pill">${siswa.kelas}</span></td>
+                        <td style="text-align:center;">${lblAyah}</td>
+                        <td style="text-align:center;">${lblIbu}</td>
+                    </tr>`;
             });
         }
+
+        // Hitung total dari SEMUA orang (Ayah/Ibu) di list filtered (meski tidak di-render di tabel)
+        filtered.forEach(siswa => {
+            if (siswa.hadir_ayah) tHadir++;
+            if (siswa.hadir_ibu) tHadir++;
+            if (siswa.posisi_ayah === 'Dalam') tDalam++;
+            if (siswa.posisi_ibu === 'Dalam') tDalam++;
+        });
+
+        document.getElementById('rekapHadir').innerText = tHadir;
+        document.getElementById('rekapDalam').innerText = tDalam;
     }
-    loadData();
+
+    // Tarik data saat halaman dibuka
+    document.addEventListener('DOMContentLoaded', fetchAllData);
 </script>
 </body>
 </html>
