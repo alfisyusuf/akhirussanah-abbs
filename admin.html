@@ -27,7 +27,9 @@
         .main-wrap { max-width: 900px; margin: 0 auto; padding: 1.25rem 1rem 2.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
 
         /* ── TABS ── */
-        .tabs { display: flex; gap: 8px; border-bottom: 2px solid #e7e5e4; margin-bottom: 4px; }
+        .tabs { display: flex; gap: 8px; border-bottom: 2px solid #e7e5e4; margin-bottom: 4px; overflow-x: auto; white-space: nowrap; padding-bottom: 2px;}
+        .tabs::-webkit-scrollbar { height: 4px; }
+        .tabs::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 4px; }
         .tab-btn { padding: 10px 16px; font-weight: 600; font-size: 14px; color: #78716c; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.2s; }
         .tab-btn:hover { color: #1c1917; }
         .tab-btn.active { color: #7f1d1d; border-bottom-color: #7f1d1d; }
@@ -46,10 +48,13 @@
         .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;}
         .stat-box { background: #fafaf9; border: 1px solid #e7e5e4; border-radius: 12px; padding: 16px; text-align: center; }
         .stat-box.active-room { background: #f0fdf4; border-color: #bbf7d0; }
+        .stat-box.info-room { background: #eff6ff; border-color: #bfdbfe; }
         .stat-label { font-size: 12px; font-weight: 600; color: #78716c; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
         .stat-value { font-size: 32px; font-weight: 700; color: #1c1917; }
         .stat-box.active-room .stat-value { color: #166534; }
         .stat-box.active-room .stat-label { color: #15803d; }
+        .stat-box.info-room .stat-value { color: #1d4ed8; }
+        .stat-box.info-room .stat-label { color: #1e40af; }
         .stat-desc { font-size: 12px; color: #a8a29e; }
 
         /* ── Broadcast Panel ── */
@@ -98,6 +103,12 @@
         .tbl-wa-btn-ayah { background: #2563eb; } .tbl-wa-btn-ayah:hover { background: #1d4ed8; }
         .tbl-wa-btn-ibu { margin-top: 4px; background: #db2777; } .tbl-wa-btn-ibu:hover { background: #be185d; }
 
+        /* ── List Rincian (Detail Item) ── */
+        .detail-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f3f0ec; font-size: 14px; }
+        .detail-item:last-child { border-bottom: none; }
+        .detail-item .dt-label { color: #57534e; }
+        .detail-item .dt-val { font-weight: 700; color: #1c1917; }
+
         /* ── Empty State ── */
         .empty-state { text-align: center; padding: 36px 20px; color: #a8a29e; font-size: 14px; }
 
@@ -132,7 +143,8 @@
     <!-- Sistem Tab -->
     <div class="tabs">
         <div class="tab-btn active" onclick="switchTab('tabData')">Data Master & WA</div>
-        <div class="tab-btn" onclick="switchTab('tabRekap')">Rekapitulasi Kehadiran</div>
+        <div class="tab-btn" onclick="switchTab('tabKonf')">Rekap Konfirmasi Web</div>
+        <div class="tab-btn" onclick="switchTab('tabRekap')">Rekap Check-in QR</div>
     </div>
 
     <!-- ==================== TAB 1: DATA MASTER ==================== -->
@@ -200,17 +212,91 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
     </div>
 
 
-    <!-- ==================== TAB 2: REKAPITULASI ==================== -->
+    <!-- ==================== TAB 2: REKAPITULASI KONFIRMASI WEB ==================== -->
+    <div id="tabKonf" class="tab-content">
+        
+        <div style="display: flex; justify-content: flex-end; margin-bottom: -10px;">
+            <select id="filterKelasKonf" class="filter-select" onchange="renderKonfTab()">
+                <option value="ALL">Rekap Semua Kelas</option>
+            </select>
+        </div>
+
+        <!-- Kotak Rekapitulasi Konfirmasi -->
+        <div class="stat-grid">
+            <div class="stat-box info-room">
+                <div class="stat-label">Siswa Hadir</div>
+                <div class="stat-value" id="kSiswaHadir">0</div>
+                <div class="stat-desc">Siswa yang mengkonfirmasi hadir</div>
+            </div>
+            <div class="stat-box active-room">
+                <div class="stat-label">Estimasi Tamu/Wali</div>
+                <div class="stat-value" id="kOrtuHadir">0</div>
+                <div class="stat-desc">Berdasarkan total kepala (1 / 2 orang)</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <div class="icon">📝</div> Rincian Jawaban Formulir Web
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    <!-- Rincian Siswa -->
+                    <div>
+                        <h4 class="font-bold text-red-800 mb-3 border-b pb-2">👨‍🎓 Kehadiran Siswa</h4>
+                        <div class="detail-item">
+                            <span class="dt-label">✔ Konfirmasi Hadir</span>
+                            <span class="dt-val" id="detSiswaHadir">0</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="dt-label">❌ Tidak Hadir</span>
+                            <span class="dt-val" id="detSiswaTidak">0</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="dt-label">⏳ Belum Merespon</span>
+                            <span class="dt-val text-gray-400" id="detSiswaBelum">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Rincian Wali -->
+                    <div>
+                        <h4 class="font-bold text-red-800 mb-3 border-b pb-2">👨‍👩‍👦 Kehadiran Orang Tua / Wali</h4>
+                        <div class="detail-item">
+                            <span class="dt-label">✔ Hadir 1 Orang</span>
+                            <span class="dt-val" id="detOrtu1">0</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="dt-label">✔ Hadir 2 Orang</span>
+                            <span class="dt-val" id="detOrtu2">0</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="dt-label">❌ Tidak Hadir</span>
+                            <span class="dt-val" id="detOrtuTidak">0</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="dt-label">⏳ Belum Merespon</span>
+                            <span class="dt-val text-gray-400" id="detOrtuBelum">0</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==================== TAB 3: REKAPITULASI CHECK-IN QR ==================== -->
     <div id="tabRekap" class="tab-content">
         
-        <!-- Filter Spesifik Rekap -->
         <div style="display: flex; justify-content: flex-end; margin-bottom: -10px;">
             <select id="filterKelasRekap" class="filter-select" onchange="renderRekapTab()">
                 <option value="ALL">Rekap Semua Kelas</option>
             </select>
         </div>
 
-        <!-- Kotak Rekapitulasi -->
         <div class="stat-grid">
             <div class="stat-box">
                 <div class="stat-label">Total Pernah Hadir</div>
@@ -279,6 +365,7 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
         
         // Render ulang tabel yang aktif agar filternya bekerja terpisah
         if(tabId === 'tabData') renderDataTab();
+        if(tabId === 'tabKonf') renderKonfTab();
         if(tabId === 'tabRekap') renderRekapTab();
     }
 
@@ -315,22 +402,27 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
         
         allData = data;
         
-        // Isi dropdown filter
+        // Isi dropdown filter untuk SEMUA Tab
         const kelasSet = [...new Set(data.map(i => i.kelas))].sort();
         const fData = document.getElementById('filterKelasData');
+        const fKonf = document.getElementById('filterKelasKonf');
         const fRekap = document.getElementById('filterKelasRekap');
+        
         if (fData.options.length === 1) {
             kelasSet.forEach(k => {
                 fData.innerHTML += `<option value="${k}">${k}</option>`;
+                fKonf.innerHTML += `<option value="${k}">${k}</option>`;
                 fRekap.innerHTML += `<option value="${k}">${k}</option>`;
             });
         }
 
+        // Render semua tab awal
         renderDataTab();
+        renderKonfTab();
         renderRekapTab();
     }
 
-    // ── RENDER TAB DATA MASTER (OPTIMIZED) ──
+    // ── RENDER TAB 1: DATA MASTER ──
     function renderDataTab() {
         const filterVal = document.getElementById('filterKelasData').value;
         const filtered = filterVal === 'ALL' ? allData : allData.filter(i => i.kelas === filterVal);
@@ -344,9 +436,7 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
             return;
         }
 
-        // Siapkan "wadah" kosong untuk menampung teks HTML sementara
-        let deskHTML = '';
-        let mobileHTML = '';
+        let deskHTML = ''; let mobileHTML = '';
 
         filtered.forEach(student => {
             const domain = window.location.origin;
@@ -362,7 +452,6 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
                 hadirBadge = `<span class="badge-hadir">✔ ${det.join(' & ')}</span>`;
             }
 
-            // Tambahkan baris ke dalam wadah sementara (bukan langsung ke layar)
             deskHTML += `
                 <tr>
                     <td class="name-cell">${student.nama}</td>
@@ -393,27 +482,66 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
                 </div>`;
         });
 
-        // Tembakkan semua wadah ke layar HANYA SEKALI
         tbodyDesk.innerHTML = deskHTML;
         listMobile.innerHTML = mobileHTML;
     }
 
-    // ── RENDER TAB REKAPITULASI (OPTIMIZED) ──
+    // ── RENDER TAB 2: REKAP KONFIRMASI WEB ──
+    function renderKonfTab() {
+        const filterVal = document.getElementById('filterKelasKonf').value;
+        const filtered = filterVal === 'ALL' ? allData : allData.filter(i => i.kelas === filterVal);
+
+        let sHadir = 0, sTidak = 0, sBelum = 0;
+        let oHadir1 = 0, oHadir2 = 0, oTidak = 0, oBelum = 0;
+
+        filtered.forEach(item => {
+            // Hitung Konfirmasi Siswa
+            const ks = (item.konf_siswa || '').toLowerCase();
+            if (ks.includes('tidak')) sTidak++;
+            else if (ks.includes('belum')) sBelum++;
+            else if (ks.includes('hadir')) sHadir++;
+            else sBelum++; 
+
+            // Hitung Konfirmasi Ortu
+            const ko = (item.konf_ortu || '').toLowerCase();
+            if (ko.includes('1')) oHadir1++;
+            else if (ko.includes('2')) oHadir2++;
+            else if (ko.includes('tidak')) oTidak++;
+            else if (ko.includes('belum')) oBelum++;
+            else if (ko.includes('hadir')) oHadir1++; // jaga-jaga format lama
+            else oBelum++;
+        });
+
+        // Estimasi jumlah kepala wali (Total 1 Orang + 2x Total 2 Orang)
+        const estOrtu = oHadir1 + (oHadir2 * 2);
+
+        // Update Angka di Layar
+        document.getElementById('kSiswaHadir').innerText = sHadir;
+        document.getElementById('kOrtuHadir').innerText = estOrtu;
+
+        document.getElementById('detSiswaHadir').innerText = sHadir;
+        document.getElementById('detSiswaTidak').innerText = sTidak;
+        document.getElementById('detSiswaBelum').innerText = sBelum;
+
+        document.getElementById('detOrtu1').innerText = oHadir1;
+        document.getElementById('detOrtu2').innerText = oHadir2;
+        document.getElementById('detOrtuTidak').innerText = oTidak;
+        document.getElementById('detOrtuBelum').innerText = oBelum;
+    }
+
+    // ── RENDER TAB 3: REKAPITULASI CHECK-IN QR ──
     function renderRekapTab() {
         const filterVal = document.getElementById('filterKelasRekap').value;
         const filtered = filterVal === 'ALL' ? allData : allData.filter(i => i.kelas === filterVal);
         
-        let tHadir = 0;
-        let tDalam = 0;
+        let tHadir = 0; let tDalam = 0;
         const tbody = document.getElementById('rekapTable');
-
         const hadirin = filtered.filter(s => s.hadir_ayah || s.hadir_ibu);
 
         if (hadirin.length === 0) {
             tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Belum ada tamu yang masuk dari kelas ini.</td></tr>`;
         } else {
-            let rekapHTML = ''; // Wadah kosong
-
+            let rekapHTML = ''; 
             hadirin.forEach(siswa => {
                 const lblAyah = !siswa.hadir_ayah ? `<span style="color:#d6d3d1;">-</span>` 
                               : (siswa.posisi_ayah === 'Dalam' ? `<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:99px; font-weight:700; font-size:11px;">Dalam</span>` 
@@ -430,8 +558,6 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
                         <td style="text-align:center;">${lblIbu}</td>
                     </tr>`;
             });
-
-            // Tembakkan ke layar HANYA SEKALI
             tbody.innerHTML = rekapHTML;
         }
 
@@ -446,7 +572,6 @@ Mohon segera konfirmasi kehadiran melalui tautan tersebut. Terima kasih.</textar
         document.getElementById('rekapDalam').innerText = tDalam;
     }
 
-    // Tarik data saat halaman dibuka
     document.addEventListener('DOMContentLoaded', fetchAllData);
 </script>
 </body>
