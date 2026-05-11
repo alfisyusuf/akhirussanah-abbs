@@ -3,131 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator Web</title>
-    <!-- Tailwind CSS untuk Styling -->
+    <title>Pro QR Code Generator (High Quality)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library QR Code Styling -->
     <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <style>
+        /* Memastikan preview tetap kecil meskipun resolusi asli besar */
+        #qr-container canvas, #qr-container svg {
+            max-width: 100% !important;
+            height: auto !important;
+            border-radius: 8px;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-6">
+<body class="bg-slate-100 min-h-screen py-10 px-4">
 
-    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h1 class="text-2xl font-bold text-slate-800 mb-6 text-center">Buat QR Code</h1>
+    <div class="max-w-4xl mx-auto flex flex-col md:flex-row gap-8">
+        
+        <!-- Panel Kontrol -->
+        <div class="bg-white p-6 rounded-2xl shadow-xl flex-1">
+            <h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <span class="bg-blue-600 text-white p-1 rounded">QR</span> Generator Pro
+            </h1>
 
-        <!-- Form Input -->
-        <div class="space-y-4 mb-6">
-            <div>
-                <label for="qr-text" class="block text-sm font-medium text-slate-700 mb-1">URL atau Teks</label>
-                <input type="text" id="qr-text" placeholder="Masukkan link atau teks di sini..." 
-                       class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
-            </div>
+            <div class="space-y-5">
+                <!-- Input Teks -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">URL atau Konten Teks</label>
+                    <textarea id="qr-text" rows="3" placeholder="https://sekolahanda.sch.id" 
+                              class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"></textarea>
+                </div>
 
-            <div>
-                <label for="qr-logo" class="block text-sm font-medium text-slate-700 mb-1">Upload Logo Sekolah (Opsional)</label>
-                <input type="file" id="qr-logo" accept="image/png, image/jpeg" 
-                       class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all">
+                <!-- Upload Logo -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Logo Sekolah (PNG/JPG)</label>
+                    <input type="file" id="qr-logo" accept="image/*" 
+                           class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Pengaturan Resolusi -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Kualitas (Pixel)</label>
+                        <select id="qr-size" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none">
+                            <option value="300">300px (Standard)</option>
+                            <option value="600">600px (Medium)</option>
+                            <option value="1200" selected>1200px (High Definition)</option>
+                            <option value="2000">2000px (Ultra HD/Cetak)</option>
+                        </select>
+                    </div>
+                    <!-- Format File -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Format Download</label>
+                        <select id="qr-extension" class="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none">
+                            <option value="png">PNG (Gambar Biasa)</option>
+                            <option value="svg">SVG (Vektor - Anti Pecah)</option>
+                            <option value="jpeg">JPEG</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="btn-generate" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all transform active:scale-95">
+                    GENERATE QR CODE
+                </button>
             </div>
         </div>
 
-        <!-- Tombol Generate -->
-        <button id="btn-generate" 
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors mb-6">
-            Generate QR Code
-        </button>
+        <!-- Panel Preview & Download -->
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-full md:w-80 flex flex-col items-center">
+            <h2 class="text-lg font-semibold text-slate-700 mb-4 text-center">Preview</h2>
+            
+            <div id="qr-container" class="bg-slate-50 w-full aspect-square rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden mb-6">
+                <span class="text-slate-400 text-sm p-4 text-center">QR Code akan muncul di sini setelah klik Generate</span>
+            </div>
 
-        <!-- Area Tampil QR Code -->
-        <div id="qr-container" class="flex justify-center mb-6 border-2 border-dashed border-slate-200 p-4 rounded-lg min-h-[300px] items-center">
-            <!-- QR Code akan muncul di sini -->
-            <p id="placeholder-text" class="text-slate-400 text-sm">QR Code akan tampil di sini</p>
+            <button id="btn-download" disabled
+                    class="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold py-3 rounded-xl shadow-md transition-all">
+                DOWNLOAD HASIL
+            </button>
+            <p class="text-[10px] text-slate-400 mt-4 text-center">Tips: Gunakan format <b>SVG</b> jika ingin mencetak pada baliho atau banner berukuran besar.</p>
         </div>
 
-        <!-- Tombol Download -->
-        <button id="btn-download" disabled
-                class="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors">
-            Download QR Code
-        </button>
     </div>
 
     <script>
-        // Inisialisasi Object QR Code
+        let currentLogo = "";
+        
+        // Setup awal QRCodeStyling
         const qrCode = new QRCodeStyling({
-            width: 300,
-            height: 300,
-            data: "https://gorigu.studio", // Default data
-            margin: 10,
-            qrOptions: {
-                errorCorrectionLevel: 'H' // Level 'H' penting agar QR tetap bisa dibaca meski tertutup logo
-            },
+            width: 1200,
+            height: 1200,
+            type: "canvas",
+            data: "",
+            image: "",
             dotsOptions: {
-                color: "#1e293b", // Warna titik (slate-800)
-                type: "rounded" // Bentuk titik: rounded, square, dots, dll
+                color: "#000000",
+                type: "rounded"
             },
-            cornersSquareOptions: {
-                type: "extra-rounded"
+            backgroundOptions: {
+                color: "#ffffff",
             },
             imageOptions: {
                 crossOrigin: "anonymous",
-                margin: 8,
-                imageSize: 0.4 // Ukuran logo proporsional terhadap QR
+                margin: 10,
+                imageSize: 0.4
+            },
+            qrOptions: {
+                errorCorrectionLevel: "H"
             }
         });
 
         const qrText = document.getElementById('qr-text');
         const qrLogo = document.getElementById('qr-logo');
+        const qrSize = document.getElementById('qr-size');
+        const qrExtension = document.getElementById('qr-extension');
         const btnGenerate = document.getElementById('btn-generate');
         const btnDownload = document.getElementById('btn-download');
         const qrContainer = document.getElementById('qr-container');
-        const placeholderText = document.getElementById('placeholder-text');
 
-        let currentLogo = ""; // Simpan URL logo
-
-        // Fungsi membaca file logo
-        qrLogo.addEventListener('change', function(e) {
+        // Handle Image Upload
+        qrLogo.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
-                    currentLogo = event.target.result; // Format base64
+                reader.onload = (event) => {
+                    currentLogo = event.target.result;
                 };
                 reader.readAsDataURL(file);
-            } else {
-                currentLogo = "";
             }
         });
 
-        // Event saat tombol Generate diklik
+        // Action Generate
         btnGenerate.addEventListener('click', () => {
-            const textValue = qrText.value.trim();
+            const val = qrText.value.trim();
+            if(!val) return alert("Isi teks atau URL dulu!");
+
+            const size = parseInt(qrSize.value);
             
-            if (!textValue) {
-                alert("Silakan masukkan URL atau teks terlebih dahulu.");
-                return;
-            }
-
-            // Sembunyikan teks placeholder
-            if (placeholderText) {
-                placeholderText.style.display = 'none';
-            }
-
-            // Update opsi QR Code
             qrCode.update({
-                data: textValue,
-                image: currentLogo
+                data: val,
+                image: currentLogo,
+                width: size,
+                height: size
             });
 
-            // Bersihkan container dan tampilkan QR baru
-            qrContainer.innerHTML = ''; 
+            qrContainer.innerHTML = "";
             qrCode.append(qrContainer);
-
-            // Aktifkan tombol download
-            btnDownload.removeAttribute('disabled');
+            btnDownload.disabled = false;
         });
 
-        // Event saat tombol Download diklik
+        // Action Download
         btnDownload.addEventListener('click', () => {
-            qrCode.download({
-                name: "QR-Code-Sekolah",
-                extension: "png"
+            const ext = qrExtension.value;
+            qrCode.download({ 
+                name: "QR_Sekolah_HighRes", 
+                extension: ext 
             });
         });
     </script>
