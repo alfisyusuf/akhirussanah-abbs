@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeri Prestasi Angkatan 11</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        [x-cloak] { display: none !important; }
+        body { background-color: #f8fafc; }
+    </style>
+</head>
+<body class="text-slate-800 font-sans antialiased" x-data="prestasiApp()" x-cloak>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <div class="bg-gradient-to-br from-blue-600 to-indigo-800 rounded-3xl shadow-xl overflow-hidden mb-10">
+            <div class="px-6 py-12 sm:px-12 sm:py-16 text-center text-white relative">
+                <div class="absolute top-0 right-0 -mr-16 -mt-16 text-white opacity-10">
+                    <i class="fas fa-trophy" style="font-size: 15rem;"></i>
+                </div>
+                <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-4 relative z-10">
+                    🌟 Galeri Prestasi Angkatan 11
+                </h1>
+                <p class="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto relative z-10">
+                    Merekam jejak keunggulan, dedikasi, dan kerja keras para siswa-siswi kebanggaan.
+                </p>
+                
+                <div class="mt-8 flex justify-center gap-4 sm:gap-8 flex-wrap relative z-10" x-show="!isLoading && !isError">
+                    <div class="bg-white/20 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-4 shadow-lg">
+                        <div class="text-3xl sm:text-4xl font-bold" x-text="stats.totalPrestasi">0</div>
+                        <div class="text-xs sm:text-sm uppercase tracking-wider text-blue-100 mt-1 font-semibold">Total Prestasi</div>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-md border border-white/10 rounded-2xl px-6 py-4 shadow-lg">
+                        <div class="text-3xl sm:text-4xl font-bold" x-text="stats.totalSiswa">0</div>
+                        <div class="text-xs sm:text-sm uppercase tracking-wider text-blue-100 mt-1 font-semibold">Siswa Berprestasi</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="isLoading" class="text-center py-20">
+            <i class="fas fa-circle-notch fa-spin text-5xl text-blue-500 mb-4"></i>
+            <p class="text-gray-500 font-medium">Memuat data prestasi...</p>
+        </div>
+
+        <div x-show="isError" style="display: none;" class="bg-red-50 text-red-600 rounded-2xl p-8 text-center max-w-lg mx-auto border border-red-100">
+            <i class="fas fa-exclamation-triangle text-4xl mb-3"></i>
+            <h3 class="text-xl font-bold mb-2">Gagal Memuat Data</h3>
+            <p class="text-sm">Pastikan file <b>data.json</b> sudah ada di folder yang sama dan kamu membukanya menggunakan Local Server (misal: Live Server / HTTP server).</p>
+        </div>
+
+        <div x-show="!isLoading && !isError" style="display: none;" x-transition>
+            
+            <div class="mb-10 relative max-w-2xl mx-auto group">
+                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400 group-focus-within:text-blue-500 transition"></i>
+                </div>
+                <input type="text" x-model="search" placeholder="Cari nama siswa atau nama lomba..." 
+                    class="w-full pl-12 pr-4 py-4 bg-white border-0 shadow-sm rounded-2xl focus:ring-4 focus:ring-blue-100 focus:outline-none text-gray-700 transition text-lg">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="student in filteredStudents" :key="student.nama">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition duration-300 flex flex-col h-full">
+                        <div class="p-5 sm:p-6 border-b border-gray-50 bg-gradient-to-r from-slate-50 to-white flex justify-between items-start gap-4">
+                            <h3 class="text-lg font-bold text-gray-800 leading-tight" x-text="student.nama"></h3>
+                            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-full whitespace-nowrap shadow-sm" x-text="student.count + ' Prestasi'"></span>
+                        </div>
+                        <div class="p-5 sm:p-6 flex-grow bg-white">
+                            <ul class="space-y-4">
+                                <template x-for="prestasi in student.prestasi">
+                                    <li class="flex items-start text-sm text-gray-600 leading-relaxed group">
+                                        <div class="mr-3 mt-0.5 flex-shrink-0 transition-transform group-hover:scale-110" x-html="getIcon(prestasi)"></div>
+                                        <span x-text="prestasi" class="group-hover:text-gray-900 transition-colors"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div x-show="filteredStudents.length === 0" class="text-center py-16" style="display: none;">
+                <div class="text-gray-300 text-6xl mb-6"><i class="fas fa-folder-open"></i></div>
+                <h3 class="text-xl font-bold text-gray-700 mb-2">Pencarian Tidak Ditemukan</h3>
+                <p class="text-gray-500">Tidak ada siswa atau prestasi yang cocok dengan "<span x-text="search" class="font-semibold"></span>".</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('prestasiApp', () => ({
+                students: [],
+                search: '',
+                isLoading: true,
+                isError: false,
+                stats: { totalPrestasi: 0, totalSiswa: 0 },
+
+                init() {
+                    // Mengambil langsung dari file data.json
+                    fetch('dataprestasi.json')
+                        .then(res => {
+                            if (!res.ok) throw new Error('Network response was not ok');
+                            return res.json();
+                        })
+                        .then(data => {
+                            this.processData(data);
+                            this.isLoading = false;
+                        })
+                        .catch(err => {
+                            console.error('Error fetching JSON:', err);
+                            this.isError = true;
+                            this.isLoading = false;
+                        });
+                },
+
+                processData(rawData) {
+                    let grouped = {};
+                    let total = 0;
+
+                    // Mengelompokkan berdasarkan NAMA
+                    rawData.forEach(row => {
+                        let nama = row.NAMA ? row.NAMA.trim() : '';
+                        let prestasi = row.PRESTASI ? row.PRESTASI.trim() : '';
+                        
+                        if (nama && prestasi) {
+                            if (!grouped[nama]) grouped[nama] = [];
+                            grouped[nama].push(prestasi);
+                            total++;
+                        }
+                    });
+
+                    // Mengubah menjadi array dan mengurutkan
+                    this.students = Object.keys(grouped).map(nama => ({
+                        nama: nama,
+                        prestasi: grouped[nama],
+                        count: grouped[nama].length
+                    })).sort((a, b) => b.count - a.count || a.nama.localeCompare(b.nama));
+
+                    this.stats.totalPrestasi = total;
+                    this.stats.totalSiswa = this.students.length;
+                },
+
+                get filteredStudents() {
+                    if (this.search === '') return this.students;
+                    const lowerSearch = this.search.toLowerCase();
+                    return this.students.filter(s => 
+                        s.nama.toLowerCase().includes(lowerSearch) || 
+                        s.prestasi.some(p => p.toLowerCase().includes(lowerSearch))
+                    );
+                },
+
+                getIcon(teks) {
+                    let lower = teks.toLowerCase();
+                    if (lower.includes('emas') || lower.includes('juara 1') || lower.includes('juara i ')) 
+                        return '<i class="fas fa-medal text-[#FBBF24] text-xl drop-shadow-sm"></i>'; 
+                    if (lower.includes('perak') || lower.includes('juara 2') || lower.includes('juara ii ')) 
+                        return '<i class="fas fa-medal text-[#94A3B8] text-xl drop-shadow-sm"></i>'; 
+                    if (lower.includes('perunggu') || lower.includes('juara 3') || lower.includes('juara iii ')) 
+                        return '<i class="fas fa-medal text-[#D97706] text-xl drop-shadow-sm"></i>'; 
+                    return '<i class="fas fa-award text-blue-400 text-xl drop-shadow-sm"></i>'; 
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
