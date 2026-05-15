@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panel MC - Akhirussanah</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Lora:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #f59e0b;
+            --btn-bg: #334155;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header & Filter */
+        header {
+            padding: 15px;
+            background: #111827;
+            border-bottom: 1px solid #334155;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        select {
+            flex: 1;
+            padding: 12px;
+            background: var(--card);
+            color: white;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        /* Main Display Area */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .student-name {
+            font-size: clamp(28px, 8vw, 42px);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .parent-container {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .parent-status {
+            font-family: 'Lora', serif;
+            font-size: 18px;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+
+        .parent-name {
+            font-family: 'Lora', serif;
+            font-size: clamp(22px, 6vw, 32px);
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* Navigation Buttons */
+        footer {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            background: #111827;
+        }
+
+        .nav-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .nav-btn:active { transform: scale(0.95); }
+        .btn-prev { background-color: #475569; }
+        .btn-next { background-color: #1d4ed8; }
+
+        .progress-footer {
+            grid-column: span 2;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="controls-row">
+            <select id="class-filter" onchange="filterClass()">
+                <option value="ALL">SEMUA KELAS</option>
+            </select>
+        </div>
+    </header>
+
+    <main id="mc-display">
+        <div class="info-label" id="current-class">KELAS ...</div>
+        <div class="student-name" id="student-name">Memuat Data...</div>
+        
+        <div class="parent-container">
+            <div class="parent-status" id="parent-prefix">Putra/Putri dari</div>
+            <div class="parent-name" id="parent-name">-</div>
+        </div>
+    </main>
+
+    <footer>
+        <button class="nav-btn btn-prev" onclick="nav(-1)">PREV</button>
+        <button class="nav-btn btn-next" onclick="nav(1)">NEXT</button>
+        <div class="progress-footer" id="progress-text">Siswa 0 dari 0</div>
+    </footer>
+
+    <script>
+        let allData = [];
+        let filtered = [];
+        let idx = 0;
+
+        fetch('data_siswa.json')
+            .then(res => res.json())
+            .then(data => {
+                allData = data;
+                filtered = [...allData];
+
+                // Setup Class Filter
+                const classes = [...new Set(data.map(s => s.Kelas))].sort((a,b) => 
+                    parseInt(a.replace('XII ','')) - parseInt(b.replace('XII ',''))
+                );
+                const select = document.getElementById('class-filter');
+                classes.forEach(c => {
+                    let opt = document.createElement('option');
+                    opt.value = c; opt.textContent = c;
+                    select.appendChild(opt);
+                });
+
+                updateView();
+            });
+
+        function filterClass() {
+            const val = document.getElementById('class-filter').value;
+            filtered = val === "ALL" ? [...allData] : allData.filter(s => s.Kelas === val);
+            idx = 0;
+            updateView();
+        }
+
+        function nav(dir) {
+            let newIdx = idx + dir;
+            if (newIdx >= 0 && newIdx < filtered.length) {
+                idx = newIdx;
+                updateView();
+            }
+        }
+
+        function updateView() {
+            if (filtered.length === 0) return;
+            const s = filtered[idx];
+            
+            // Logic Gender Siswa & Ortu
+            const numKelas = parseInt(s.Kelas.replace('XII ', ''));
+            let statusAnak = (numKelas >= 7 && numKelas <= 12) ? "Putri" : "Putra";
+            
+            let statusOrtu = "Bapak";
+            const daftarIbu = ["Linda Novianti", "Endang Tri Haryani", "Heny Dwi Hantoro", "Yuni Rudito", "Yuli Purnomo"];
+            if (daftarIbu.includes(s["Nama Orang Tua"])) statusOrtu = "Ibu";
+
+            document.getElementById('student-name').textContent = s.Nama;
+            document.getElementById('parent-name').textContent = s["Nama Orang Tua"];
+            document.getElementById('parent-prefix').textContent = `${statusAnak} dari ${statusOrtu}`;
+            document.getElementById('current-class').textContent = `KELAS ${s.Kelas}`;
+            document.getElementById('progress-text').textContent = `Siswa ${idx + 1} dari ${filtered.length}`;
+            
+            // Vibrate feedback jika HP mendukung
+            if (window.navigator.vibrate) window.navigator.vibrate(20);
+        }
+    </script>
+</body>
+</html>
