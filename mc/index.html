@@ -12,7 +12,6 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --accent: #f59e0b;
-            --btn-bg: #334155;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -29,27 +28,34 @@
             overflow: hidden;
         }
 
-        /* Header & Filter */
+        /* Header & Lompat Kelas */
         header {
             padding: 15px;
             background: #111827;
             border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .controls-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        .header-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            white-space: nowrap;
         }
 
         select {
             flex: 1;
-            padding: 12px;
+            padding: 10px 12px;
             background: var(--card);
             color: white;
             border: 1px solid #475569;
             border-radius: 8px;
             font-size: 16px;
+            font-weight: 600;
+            outline: none;
         }
 
         /* Main Display Area */
@@ -58,17 +64,38 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
             padding: 20px;
             text-align: center;
         }
 
         .info-label {
-            font-size: 14px;
+            font-size: 16px;
             color: var(--accent);
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-            font-weight: 600;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        /* Lencana Akhir Kelas */
+        .end-badge {
+            background-color: #ef4444; /* Merah terang */
+            color: white;
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .student-name {
@@ -77,6 +104,7 @@
             line-height: 1.2;
             margin-bottom: 30px;
             color: white;
+            width: 100%;
         }
 
         .parent-container {
@@ -84,6 +112,8 @@
             padding: 20px;
             border-radius: 12px;
             border-left: 4px solid var(--accent);
+            width: 100%;
+            max-width: 500px;
         }
 
         .parent-status {
@@ -108,17 +138,19 @@
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             background: #111827;
+            border-top: 1px solid #334155;
         }
 
         .nav-btn {
-            padding: 20px;
+            padding: 22px;
             border: none;
             border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 18px;
+            font-weight: 800;
             color: white;
             cursor: pointer;
             transition: transform 0.1s;
+            letter-spacing: 1px;
         }
 
         .nav-btn:active { transform: scale(0.95); }
@@ -137,15 +169,15 @@
 <body>
 
     <header>
-        <div class="controls-row">
-            <select id="class-filter" onchange="filterClass()">
-                <option value="ALL">SEMUA KELAS</option>
-            </select>
-        </div>
+        <div class="header-label">Lompat ke:</div>
+        <select id="class-select" onchange="jumpToClass()"></select>
     </header>
 
     <main id="mc-display">
         <div class="info-label" id="current-class">KELAS ...</div>
+        
+        <div class="end-badge" id="end-class-badge" style="display: none;">AKHIR KELAS</div>
+        
         <div class="student-name" id="student-name">Memuat Data...</div>
         
         <div class="parent-container">
@@ -162,49 +194,53 @@
 
     <script>
         let allData = [];
-        let filtered = [];
         let idx = 0;
 
         fetch('data_siswa.json')
             .then(res => res.json())
             .then(data => {
                 allData = data;
-                filtered = [...allData];
 
-                // Setup Class Filter
+                // Setup Dropdown Lompat Kelas
                 const classes = [...new Set(data.map(s => s.Kelas))].sort((a,b) => 
                     parseInt(a.replace('XII ','')) - parseInt(b.replace('XII ',''))
                 );
-                const select = document.getElementById('class-filter');
+                
+                const select = document.getElementById('class-select');
                 classes.forEach(c => {
                     let opt = document.createElement('option');
-                    opt.value = c; opt.textContent = c;
+                    opt.value = c; 
+                    opt.textContent = c;
                     select.appendChild(opt);
                 });
 
                 updateView();
             });
 
-        function filterClass() {
-            const val = document.getElementById('class-filter').value;
-            filtered = val === "ALL" ? [...allData] : allData.filter(s => s.Kelas === val);
-            idx = 0;
-            updateView();
+        function jumpToClass() {
+            const val = document.getElementById('class-select').value;
+            // Cari index pertama dari kelas yang dipilih
+            const targetIdx = allData.findIndex(s => s.Kelas === val);
+            if (targetIdx !== -1) {
+                idx = targetIdx;
+                updateView();
+            }
         }
 
         function nav(dir) {
             let newIdx = idx + dir;
-            if (newIdx >= 0 && newIdx < filtered.length) {
+            // Selama masih di dalam batas total semua siswa
+            if (newIdx >= 0 && newIdx < allData.length) {
                 idx = newIdx;
                 updateView();
             }
         }
 
         function updateView() {
-            if (filtered.length === 0) return;
-            const s = filtered[idx];
+            if (allData.length === 0) return;
+            const s = allData[idx];
             
-            // Logic Gender Siswa & Ortu
+            // Logic Gender Siswa & Ortu (Otomatis)
             const numKelas = parseInt(s.Kelas.replace('XII ', ''));
             let statusAnak = (numKelas >= 7 && numKelas <= 12) ? "Putri" : "Putra";
             
@@ -212,14 +248,37 @@
             const daftarIbu = ["Linda Novianti", "Endang Tri Haryani", "Heny Dwi Hantoro", "Yuni Rudito", "Yuli Purnomo"];
             if (daftarIbu.includes(s["Nama Orang Tua"])) statusOrtu = "Ibu";
 
+            // Update Teks Layar
             document.getElementById('student-name').textContent = s.Nama;
             document.getElementById('parent-name').textContent = s["Nama Orang Tua"];
             document.getElementById('parent-prefix').textContent = `${statusAnak} dari ${statusOrtu}`;
             document.getElementById('current-class').textContent = `KELAS ${s.Kelas}`;
-            document.getElementById('progress-text').textContent = `Siswa ${idx + 1} dari ${filtered.length}`;
+            document.getElementById('progress-text').textContent = `Urutan: ${idx + 1} dari total ${allData.length} siswa`;
             
-            // Vibrate feedback jika HP mendukung
-            if (window.navigator.vibrate) window.navigator.vibrate(20);
+            // Sinkronkan dropdown dengan kelas siswa yang sedang tampil
+            document.getElementById('class-select').value = s.Kelas;
+
+            // LOGIKA AKHIR KELAS
+            let isEndOfClass = false;
+            // Jika ini siswa terakhir di seluruh data
+            if (idx === allData.length - 1) {
+                isEndOfClass = true;
+            } 
+            // Atau jika kelas siswa BERIKUTNYA berbeda dengan kelas siswa INI
+            else if (allData[idx].Kelas !== allData[idx + 1].Kelas) {
+                isEndOfClass = true;
+            }
+
+            const badge = document.getElementById('end-class-badge');
+            if (isEndOfClass) {
+                badge.style.display = 'inline-block';
+                badge.textContent = `⚠️ SISWA TERAKHIR DI KELAS ${s.Kelas}`;
+            } else {
+                badge.style.display = 'none';
+            }
+            
+            // Vibrate feedback (Getaran) jika HP mendukung
+            if (window.navigator.vibrate) window.navigator.vibrate(30);
         }
     </script>
 </body>
